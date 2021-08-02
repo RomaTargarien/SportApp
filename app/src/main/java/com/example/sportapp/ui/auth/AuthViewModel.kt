@@ -18,6 +18,11 @@ import com.example.sportapp.repositories.AuthRepository
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
+import io.reactivex.rxjava3.subjects.Subject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import java.lang.Exception
@@ -36,6 +41,9 @@ class AuthViewModel @ViewModelInject constructor(
 
     private val _passwordResetStatus = MutableLiveData<Resource<String>>()
     val passwordResetStatus: LiveData<Resource<String>> = _passwordResetStatus
+
+    private val _loginObserver = PublishSubject.create<Resource<AuthResult>>()
+    val loginObsevrer get() = _loginObserver.hide()
 
     fun register(email: String,username: String,password: String, repeatPassword: String) {
         val error = if (email.isEmpty() || username.isEmpty() || password.isEmpty()) {
@@ -94,6 +102,69 @@ class AuthViewModel @ViewModelInject constructor(
         } else {
             _passwordResetStatus.postValue(Resource.Success(applicationContext.getString(R.string.error_input_empty)))
         }
+    }
+    fun resetPasswordRx(email: String) {
+        if (!email.isEmpty()) {
+            repository.restPasswordRx(email)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    _passwordResetStatus.postValue(Resource.Success("Password reset link was sent to your email"))
+                }, {
+                    _passwordResetStatus.postValue(Resource.Error(it.message ?: ""))
+                })
+        } else {
+            _passwordResetStatus.postValue(Resource.Error(applicationContext.getString(R.string.error_input_empty)))
+        }
+    }
+
+    fun loginRX(email: String,password: String) {
+        val x = repository.loginRx(email,password)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe {
+                _loginStatus.postValue(Resource.Loading())
+            }
+            .doOnDispose {
+                _loginStatus.postValue(Resource.Error("Canceled"))
+            }
+            .subscribe({
+                _loginStatus.postValue(Resource.Success(it))
+               // _loginObserver.onNext(Resource.Success(it))
+            }, {
+                _loginStatus.postValue(Resource.Error(it.message ?: ""))
+            })
+    }
+
+    fun registerRx(email: String,username: String,password: String, repeatPassword: String) {
+        val error = if (email.isEmpty() || username.isEmpty() || password.isEmpty()) {
+            applicationContext.getString(R.string.error_input_empty)
+        } else if (password != repeatPassword) {
+            applicationContext.getString(R.string.error_incorrectly_repeated_password)
+        } else if (username.length < MIN_USERNAME_LENGHT) {
+            applicationContext.getString(R.string.error_username_too_short, MIN_USERNAME_LENGHT)
+        } else if (username.length > MAX_USERNAME_LENGHT) {
+            applicationContext.getString(R.string.error_username_too_long, MAX_USERNAME_LENGHT)
+        } else if (password.length < MIN_PASSWORD_LENGHT) {
+            applicationContext.getString(R.string.error_password_too_short, MIN_PASSWORD_LENGHT)
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            applicationContext.getString(R.string.error_not_a_valid_email)
+        }
+        else null
+
+        error?.let {
+            _registerStatus.postValue(Resource.Error(it))
+            return
+        }
+        _registerStatus.postValue(Resource.Loading())
+        repository.registerRx(email, username, password)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                _registerStatus.postValue(Resource.Success(it))
+            }, {
+                _registerStatus.postValue(Resource.Error(it.message ?: ""))
+            })
     }
 }
 

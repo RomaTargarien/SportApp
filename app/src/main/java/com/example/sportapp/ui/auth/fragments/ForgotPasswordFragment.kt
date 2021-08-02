@@ -31,15 +31,16 @@ class ForgotPasswordFragment : Fragment() {
     ): View {
         binding = FragmentForgotPasswordBinding.inflate(layoutInflater,container,false)
         binding.bnForgotPassword.setOnClickListener {
-            viewModel.resetPassword(binding.edForgotPasswordEmail.text.toString())
+            viewModel.resetPasswordRx(binding.edForgotPasswordEmail.text.toString())
         }
         return binding.root
     }
 
     fun observe() {
         viewModel.passwordResetStatus.observe(viewLifecycleOwner) {
-            if (it is Resource.Success) {
-                it.data?.let { snackbar(it) }
+            when (it) {
+                is Resource.Success -> {snackbar(it.data ?: "")}
+                is Resource.Error -> {snackbar(it.message ?: "")}
             }
         }
     }

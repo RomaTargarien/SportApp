@@ -33,7 +33,7 @@ class RegisterFragment : Fragment() {
     ): View {
         binding = FragmentRegisterBinding.inflate(inflater,container,false)
         binding.bnRegister.setOnClickListener {
-            viewModel.register(
+            viewModel.registerRx(
                 email = binding.edRegisterEmail.text.toString(),
                 username = binding.edRegisterUsername.text.toString(),
                 password = binding.edRegisterPassword.text.toString(),

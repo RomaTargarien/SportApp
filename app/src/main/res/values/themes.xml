@@ -35,4 +35,15 @@
         <item name="fontFamily">@font/alfa_slab_one</item>
     </style>
 
+
+    <style name="TextInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:textColorHint">@color/design_default_color_primary</item>
+        <item name="startIconTint">@color/design_default_color_primary</item>
+        <item name="boxStrokeColor">@color/design_default_color_primary</item>
+        <item name="boxCornerRadiusTopEnd">10dp</item>
+        <item name="boxCornerRadiusBottomEnd">10dp</item>
+        <item name="boxCornerRadiusBottomStart">10dp</item>
+        <item name="boxCornerRadiusTopStart">10dp</item>
+    </style>
+
 </resources>

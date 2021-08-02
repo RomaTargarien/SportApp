@@ -2,13 +2,14 @@ package com.example.sportapp.ui.auth.fragments
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.sportapp.R
@@ -18,17 +19,14 @@ import com.example.sportapp.other.Resource
 import com.example.sportapp.other.snackbar
 import com.example.sportapp.ui.auth.AuthViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
-import java.lang.Exception
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.ObservableEmitter
+import io.reactivex.rxjava3.schedulers.Schedulers
+import java.util.*
+
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
@@ -59,11 +57,37 @@ class LoginFragment : Fragment() {
         binding = FragmentLoginBinding.inflate(inflater,container,false)
 
         binding.bnLogIn.setOnClickListener {
-            viewModel.login(
+            viewModel.loginRX(
                 email = binding.edLoginEmail.text.toString(),
                 password = binding.edLoginPassword.text.toString()
             )
         }
+        val observable = Observable.create { emitter: ObservableEmitter<Any?> ->
+            val watcher: TextWatcher = object : TextWatcher {
+                override fun beforeTextChanged( charSequence: CharSequence, i: Int, i1: Int, i2: Int) { }
+
+                override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
+                }
+
+                override fun afterTextChanged(editable: Editable) {
+                    if (!emitter.isDisposed) { //если еще не отписались
+                        emitter.onNext(editable.toString()) //отправляем текущее состояние
+                    }
+                }
+            }
+            emitter.setCancellable { binding.edLoginEmail.removeTextChangedListener(watcher) } //удаляем листенер при отписке от observable
+            binding.edLoginEmail.addTextChangedListener(watcher)
+        }
+        observable
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                Log.d("TAG",it.toString())
+            }, {
+
+            },{
+
+            })
 
         binding.bnGoogleSignIn.setOnClickListener {
             val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -96,7 +120,15 @@ class LoginFragment : Fragment() {
                 }
             }
         }
+//        viewModel.loginObsevrer
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribe (
+//                {
+//            it.data.
+//        })
     }
+
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
