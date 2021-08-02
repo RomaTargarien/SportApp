@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +27,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 @AndroidEntryPoint
@@ -62,32 +64,48 @@ class LoginFragment : Fragment() {
                 password = binding.edLoginPassword.text.toString()
             )
         }
-        val observable = Observable.create { emitter: ObservableEmitter<Any?> ->
+
+
+
+
+       Observable.create { emitter: ObservableEmitter<Resource<String>> ->
             val watcher: TextWatcher = object : TextWatcher {
-                override fun beforeTextChanged( charSequence: CharSequence, i: Int, i1: Int, i2: Int) { }
+                override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
 
                 override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
+                    binding.textInput1.setErrorEnabled(false)
                 }
 
                 override fun afterTextChanged(editable: Editable) {
-                    if (!emitter.isDisposed) { //если еще не отписались
-                        emitter.onNext(editable.toString()) //отправляем текущее состояние
+                    if (!Patterns.EMAIL_ADDRESS.matcher(editable.toString()).matches()) {
+                        emitter.onNext(Resource.Error(getString(R.string.error_input_empty)))
+                    } else {
+                        emitter.onNext(Resource.Success(""))
                     }
                 }
             }
-            emitter.setCancellable { binding.edLoginEmail.removeTextChangedListener(watcher) } //удаляем листенер при отписке от observable
+            emitter.setCancellable { binding.edLoginEmail.removeTextChangedListener(watcher) }
             binding.edLoginEmail.addTextChangedListener(watcher)
-        }
-        observable
-            .subscribeOn(Schedulers.computation())
+        }.subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                Log.d("TAG",it.toString())
+                when (it) {
+                    is Resource.Error -> {
+                        binding.textInput1.setErrorEnabled(true)
+                        binding.textInput1.error = it.message
+                    }
+                    is Resource.Success -> {
+                        binding.textInput1.setErrorEnabled(false)
+                    }
+                }
             }, {
 
             },{
 
             })
+
+
+
 
         binding.bnGoogleSignIn.setOnClickListener {
             val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
