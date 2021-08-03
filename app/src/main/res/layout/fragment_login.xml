@@ -67,7 +67,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInput1"
+            android:id="@+id/textInputLoginEmail"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
@@ -101,7 +101,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInput1"
+            app:layout_constraintTop_toBottomOf="@+id/textInputLoginEmail"
             app:passwordToggleEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText

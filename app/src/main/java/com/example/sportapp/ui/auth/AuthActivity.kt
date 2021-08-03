@@ -9,6 +9,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.sportapp.R
 import com.example.sportapp.databinding.ActivityAuthBinding
 import com.example.sportapp.other.Resource
+import com.example.sportapp.ui.auth.viewModels.ForgotPasswordViewModel
+import com.example.sportapp.ui.auth.viewModels.LoginViewModel
+import com.example.sportapp.ui.auth.viewModels.RegisterViewModel
 import com.example.sportapp.ui.main.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
@@ -16,22 +19,26 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class AuthActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityAuthBinding
-    private lateinit var viewModel: AuthViewModel
+    private lateinit var viewModelLogin: LoginViewModel
+    private lateinit var viewModelRegister: RegisterViewModel
+    private lateinit var viewModelForgotPassword: ForgotPasswordViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth)
-        viewModel = ViewModelProvider(this).get(AuthViewModel::class.java)
+        viewModelLogin = ViewModelProvider(this).get(LoginViewModel::class.java)
+        viewModelRegister = ViewModelProvider(this).get(RegisterViewModel::class.java)
+        viewModelForgotPassword = ViewModelProvider(this).get(ForgotPasswordViewModel::class.java)
+
         if (FirebaseAuth.getInstance().currentUser != null) {
             enter()
         }
-        viewModel.loginStatus.observe(this) {
+        viewModelLogin.loginStatus.observe(this) {
             if (it is Resource.Success) {
                 enter()
             }
         }
-        viewModel.registerStatus.observe(this) {
+        viewModelRegister.registerStatus.observe(this) {
             if (it is Resource.Success) {
                 enter()
             }
