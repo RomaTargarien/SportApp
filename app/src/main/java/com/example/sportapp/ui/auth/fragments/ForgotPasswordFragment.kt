@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.sportapp.databinding.FragmentForgotPasswordBinding
 import com.example.sportapp.other.Resource
 import com.example.sportapp.other.snackbar
+import com.example.sportapp.other.textInputBehavior
 import com.example.sportapp.ui.auth.viewModels.ForgotPasswordViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -20,7 +21,7 @@ class ForgotPasswordFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity()).get(ForgotPasswordViewModel::class.java)
+
         observe()
     }
     override fun onCreateView(
@@ -28,6 +29,18 @@ class ForgotPasswordFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentForgotPasswordBinding.inflate(layoutInflater,container,false)
+        viewModel = ViewModelProvider(requireActivity()).get(ForgotPasswordViewModel::class.java)
+
+
+        binding.textInputEmailForgotPassword.textInputBehavior(
+            subjectInput = viewModel._emailReset,
+            subjectOutput = viewModel.emailReset
+        )
+        viewModel.resetPasswordButtonEnabled.subscribe({
+            binding.bnForgotPassword.alpha = if (it) 1f else 0.7f
+            binding.bnForgotPassword.isEnabled = it
+        },{})
+
         binding.bnForgotPassword.setOnClickListener {
             viewModel.resetPasswordRx(binding.edForgotPasswordEmail.text.toString())
         }

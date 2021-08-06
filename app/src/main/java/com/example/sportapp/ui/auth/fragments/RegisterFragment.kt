@@ -9,8 +9,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.example.sportapp.R
 import com.example.sportapp.databinding.FragmentRegisterBinding
-import com.example.sportapp.other.Resource
-import com.example.sportapp.other.snackbar
+import com.example.sportapp.other.*
 import com.example.sportapp.ui.auth.viewModels.RegisterViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,7 +21,6 @@ class RegisterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity()).get(RegisterViewModel::class.java)
         observe()
     }
 
@@ -31,14 +29,39 @@ class RegisterFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentRegisterBinding.inflate(inflater,container,false)
+        viewModel = ViewModelProvider(requireActivity()).get(RegisterViewModel::class.java)
+
+        binding.textInputRegisterEmail.textInputBehavior(
+            subjectInput = viewModel._registerEmail,
+            subjectOutput = viewModel.registerEmail
+        )
+        binding.textInputRegisterUsername.textInputBehavior(
+            subjectInput = viewModel._registerUserName,
+            subjectOutput = viewModel.registerUserName
+        )
+        binding.textInputRegisterPassword.textInputBehavior(
+            subjectInput = viewModel._registerPassword,
+            subjectOutput = viewModel.registerPassword
+        )
+        binding.textInputRegisterRepeatPassword.textInputBehavior(
+            subjectInput = viewModel._registerRepeatPassword,
+            subjectOutput = viewModel.registerRepeatPassword
+        )
+
+        //buttonRegister
+        viewModel.buttonSignInEnabled.subscribe( {
+            binding.bnRegister.alpha = if (it) 1f else 0.7f
+            binding.bnRegister.isEnabled = it
+        },{},{})
+
         binding.bnRegister.setOnClickListener {
             viewModel.registerRx(
                 email = binding.edRegisterEmail.text.toString(),
                 username = binding.edRegisterUsername.text.toString(),
                 password = binding.edRegisterPassword.text.toString(),
-                repeatPassword = binding.edRegisterRepeatedPassword.text.toString()
             )
         }
+
         return binding.root
     }
 

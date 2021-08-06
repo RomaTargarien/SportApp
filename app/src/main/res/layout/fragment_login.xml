@@ -92,7 +92,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInput2"
+            android:id="@+id/textInputLoginPassword"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -127,7 +127,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInput2">
+            app:layout_constraintTop_toBottomOf="@+id/textInputLoginPassword">
 
         </androidx.appcompat.widget.AppCompatButton>
 
@@ -154,7 +154,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInput2" />
+            app:layout_constraintTop_toBottomOf="@+id/textInputLoginPassword" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/bnGoogleSignIn"
@@ -192,7 +192,7 @@
             android:layout_marginEnd="38dp"
             android:text="Forgot password?"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInput2" />
+            app:layout_constraintTop_toBottomOf="@+id/textInputLoginPassword" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

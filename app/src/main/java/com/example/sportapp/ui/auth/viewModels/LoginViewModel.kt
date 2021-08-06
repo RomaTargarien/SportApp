@@ -1,12 +1,15 @@
 package com.example.sportapp.ui.auth.viewModels
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sportapp.other.Resource
+import com.example.sportapp.other.validateEmail
+import com.example.sportapp.other.validatePassword
 import com.example.sportapp.repositories.AuthRepository
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.AuthResult
@@ -20,39 +23,58 @@ import io.reactivex.rxjava3.subjects.PublishSubject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 class LoginViewModel @ViewModelInject constructor(
     private val repository: AuthRepository,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
+    private val applicationContext: Context
 ): ViewModel() {
 
-    constructor() : this(repository, dispatcher) {
-        loginEmail.
-                   .subscribeOn(AndroidSchedulers.mainThread())
-           .debounce(1000,TimeUnit.MILLISECONDS)
-           .observeOn(Schedulers.computation())
-           .map {  checkEmail(it) }
-           .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(isSnackbarShown)
-//           .subscribe({
-//               isSnackbarShown.onNext(it)
-  //             binding.textInputLoginEmail.enableError(it)
-//                      }, { },{ })
-    }
-
-    private val _loginStatus = MutableLiveData<Resource<AuthResult>>()
+    val _loginStatus = MutableLiveData<Resource<AuthResult>>()
     val loginStatus: LiveData<Resource<AuthResult>> = _loginStatus
 
-    val loginPassword = BehaviorSubject.create<String>()
+    val _loginPassword = BehaviorSubject.create<String>()
+    val loginPassword = BehaviorSubject.create<Resource<String>>()
 
-    val loginAction = PublishSubject.create<Boolean>()
+    val loginButtonEnabled = BehaviorSubject.createDefault(false)
 
     val isSnackbarShown = PublishSubject.create<Boolean>()
 
-    val loginEmail = BehaviorSubject.create<String>()
+    val _loginEmail = BehaviorSubject.create<String>()
+    val loginEmail = BehaviorSubject.create<Resource<String>>()
+
+    init {
+       val emailSubject = _loginEmail
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .debounce(1000,TimeUnit.MILLISECONDS)
+            .distinctUntilChanged()
+            .observeOn(Schedulers.computation())
+            .map { it.validateEmail(applicationContext) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .share()
+
+        emailSubject.subscribe(loginEmail)
+
+        val passwordSubject = _loginPassword
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .debounce(1000,TimeUnit.MILLISECONDS)
+            .distinctUntilChanged()
+            .observeOn(Schedulers.computation())
+            .map { it.validatePassword(applicationContext) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .share()
+
+        passwordSubject.subscribe(loginPassword)
+
+        Observable.combineLatest(emailSubject,passwordSubject, { first,second ->
+            first is Resource.Success && second is Resource.Success
+        }).subscribe({
+            loginButtonEnabled.onNext(it)
+        },{},{})
+    }
 
     fun loginRX(email: String,password: String) {
-        val x = repository.loginRx(email,password)
+       repository.loginRx(email,password)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe {
@@ -70,9 +92,13 @@ class LoginViewModel @ViewModelInject constructor(
 
     fun loginWithGoogle(account: GoogleSignInAccount) {
         val credentials = GoogleAuthProvider.getCredential(account.idToken,null)
-        viewModelScope.launch(dispatcher) {
-            val result = repository.loginWithGoogle(credentials)
-            _loginStatus.postValue(result)
-        }
+        repository.loginWithGoogle(credentials)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                _loginStatus.postValue(Resource.Success(it))
+            },{
+                _loginStatus.postValue(Resource.Error("Log in failed"))
+            })
     }
 }

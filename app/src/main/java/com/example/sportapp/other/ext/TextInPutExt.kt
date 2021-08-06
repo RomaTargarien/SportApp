@@ -5,6 +5,7 @@ import android.text.TextWatcher
 import com.google.android.material.textfield.TextInputLayout
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
+import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 fun TextInputLayout.observe(): Observable<String> {
     return Observable.create { emitter: ObservableEmitter<String> ->
@@ -15,6 +16,7 @@ fun TextInputLayout.observe(): Observable<String> {
                 i1: Int,
                 i2: Int
             ) {
+                this@observe.setErrorEnabled(false)
             }
 
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
@@ -24,6 +26,7 @@ fun TextInputLayout.observe(): Observable<String> {
             override fun afterTextChanged(editable: Editable) {
                 emitter.onNext(editable.toString())
             }
+
         }
         emitter.setCancellable { this.editText?.removeTextChangedListener(watcher) }
         this.editText?.addTextChangedListener(watcher)
@@ -40,4 +43,21 @@ fun TextInputLayout.enableError(result: Resource<String>) {
             this.setErrorEnabled(false)
         }
     }
+}
+
+fun TextInputLayout.textInputBehavior(
+    subjectInput: BehaviorSubject<String>,
+    subjectOutput: BehaviorSubject<Resource<String>>
+) {
+    this.observe().distinctUntilChanged()
+        .subscribe(subjectInput)
+
+    subjectOutput.subscribe({
+        this.enableError(it)
+    },{})
+
+    subjectInput.subscribe( {
+        this.editText?.setText(it)
+        this.editText?.setSelection(it.length)
+    },{},{})
 }

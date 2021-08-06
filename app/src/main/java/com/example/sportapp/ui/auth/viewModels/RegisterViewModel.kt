@@ -1,18 +1,22 @@
 package com.example.sportapp.ui.auth.viewModels
 
 import android.content.Context
+import android.util.Log
 import android.util.Patterns
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.sportapp.R
-import com.example.sportapp.other.Constants
-import com.example.sportapp.other.Resource
+import com.example.sportapp.other.*
 import com.example.sportapp.repositories.AuthRepository
 import com.google.firebase.auth.AuthResult
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.BehaviorSubject
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 class RegisterViewModel @ViewModelInject constructor(
     private val repository: AuthRepository,
@@ -22,35 +26,92 @@ class RegisterViewModel @ViewModelInject constructor(
     private val _registerStatus = MutableLiveData<Resource<AuthResult>>()
     val registerStatus: LiveData<Resource<AuthResult>> = _registerStatus
 
-    fun registerRx(email: String,username: String,password: String, repeatPassword: String) {
-        val error = if (email.isEmpty() || username.isEmpty() || password.isEmpty()) {
-            applicationContext.getString(R.string.error_input_empty)
-        } else if (password != repeatPassword) {
-            applicationContext.getString(R.string.error_incorrectly_repeated_password)
-        } else if (username.length < Constants.MIN_USERNAME_LENGHT) {
-            applicationContext.getString(
-                R.string.error_username_too_short,
-                Constants.MIN_USERNAME_LENGHT
-            )
-        } else if (username.length > Constants.MAX_USERNAME_LENGHT) {
-            applicationContext.getString(
-                R.string.error_username_too_long,
-                Constants.MAX_USERNAME_LENGHT
-            )
-        } else if (password.length < Constants.MIN_PASSWORD_LENGHT) {
-            applicationContext.getString(
-                R.string.error_password_too_short,
-                Constants.MIN_PASSWORD_LENGHT
-            )
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            applicationContext.getString(R.string.error_not_a_valid_email)
-        }
-        else null
+    val _registerEmail = BehaviorSubject.create<String>()
+    val registerEmail = BehaviorSubject.create<Resource<String>>()
 
-        error?.let {
-            _registerStatus.postValue(Resource.Error(it))
-            return
+    val _registerUserName = BehaviorSubject.create<String>()
+    val registerUserName = BehaviorSubject.create<Resource<String>>()
+
+    val _registerPassword = BehaviorSubject.create<String>()
+    val registerPassword = BehaviorSubject.create<Resource<String>>()
+
+    val _registerRepeatPassword = BehaviorSubject.create<String>()
+    val registerRepeatPassword = BehaviorSubject.create<Resource<String>>()
+
+    val buttonSignInEnabled = BehaviorSubject.createDefault(false)
+
+    init {
+        val emailSubject = _registerEmail
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .debounce(1000, TimeUnit.MILLISECONDS)
+            .distinctUntilChanged()
+            .observeOn(Schedulers.computation())
+            .map { it.validateEmail(applicationContext) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .share()
+        emailSubject.subscribe(registerEmail)
+
+        val usernameSubject = _registerUserName
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .debounce(1000, TimeUnit.MILLISECONDS)
+            .distinctUntilChanged()
+            .observeOn(Schedulers.computation())
+            .map { it.validateUsername(applicationContext) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .share()
+        usernameSubject.subscribe(registerUserName)
+
+        val passwordSubject = _registerPassword
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .debounce(1000, TimeUnit.MILLISECONDS)
+            .distinctUntilChanged()
+
+        val passwordSubjectValidation = passwordSubject
+            .observeOn(Schedulers.computation())
+            .map { it.validatePassword(applicationContext) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .share()
+
+        passwordSubjectValidation.subscribe(registerPassword)
+
+        val repeatedPasswordSubject = _registerRepeatPassword
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .debounce(1000, TimeUnit.MILLISECONDS)
+            .distinctUntilChanged()
+
+        val repeatedPasswordSubjectValidaion = repeatedPasswordSubject
+            .observeOn(Schedulers.computation())
+            .map { it.validatePassword(applicationContext) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .share()
+
+        repeatedPasswordSubjectValidaion.subscribe(registerRepeatPassword)
+
+        val comparingPasswords = Observable.combineLatest(
+            passwordSubject,
+            repeatedPasswordSubject
+        ) { first, second ->
+            first.equals(second)
         }
+
+        Observable.combineLatest(
+            emailSubject,
+            usernameSubject,
+            passwordSubjectValidation,
+            repeatedPasswordSubjectValidaion,
+            comparingPasswords
+        ) { first, second,third, fourth, fifth ->
+            first is Resource.Success && // emailSubject
+                    second is Resource.Success && // usernameSubject
+                    third is Resource.Success && // passwordSubjectValidation
+                    fourth is Resource.Success && // repeatedPasswordSubjectValidaion
+                    fifth // comparingPasswords
+        }.subscribe({
+            buttonSignInEnabled.onNext(it)
+        },{})
+    }
+
+    fun registerRx(email: String, username: String, password: String) {
         _registerStatus.postValue(Resource.Loading())
         repository.registerRx(email, username, password)
             .subscribeOn(Schedulers.io())

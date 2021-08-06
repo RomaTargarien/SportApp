@@ -27,8 +27,10 @@ import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.BehaviorSubject
 import java.util.concurrent.TimeUnit
 
 
@@ -40,11 +42,12 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity()).get(LoginViewModel::class.java)
+
         binding.tvRegister.setOnClickListener {
             findNavController().navigate(
                 LoginFragmentDirections.actionLoginFragmentToRegisterFragment()
             )
+            viewModel._loginStatus.postValue(null)
         }
         binding.tvForgotPassword.setOnClickListener {
             findNavController().navigate(
@@ -59,27 +62,32 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentLoginBinding.inflate(inflater,container,false)
+        viewModel = ViewModelProvider(requireActivity()).get(LoginViewModel::class.java)
+
+
+        //editTextLoginEmail
+        binding.textInputLoginEmail.textInputBehavior(
+            subjectInput = viewModel._loginEmail,
+            subjectOutput = viewModel.loginEmail)
+
+        //editTextLoginPassword
+        binding.textInputLoginPassword.textInputBehavior(
+            subjectInput = viewModel._loginPassword,
+            subjectOutput = viewModel.loginPassword
+        )
+        //buttonLogIn
+        viewModel.loginButtonEnabled.subscribe({
+            binding.bnLogIn.alpha = if (it) 1f else 0.7f
+            binding.bnLogIn.isEnabled = it
+        },{})
 
         binding.bnLogIn.setOnClickListener {
+            Log.d("TAG","clicked")
             viewModel.loginRX(
                 email = binding.edLoginEmail.text.toString(),
                 password = binding.edLoginPassword.text.toString()
             )
         }
-
-
-        binding.textInputLoginEmail.observe().subscribe(viewModel.loginEmail)
-        viewModel.loginEmail.subscribe(binding.textInputLoginEmail.observer())
-
-//           .subscribeOn(AndroidSchedulers.mainThread())
-//           .debounce(1000,TimeUnit.MILLISECONDS)
-//           .observeOn(Schedulers.computation())
-//           .map {  checkEmail(it) }
-//           .observeOn(AndroidSchedulers.mainThread())
-//           .subscribe({
-//               binding.textInputLoginEmail.enableError(it)
-//                      }, { },{ })
-
 
 
 
@@ -116,24 +124,19 @@ class LoginFragment : Fragment() {
         }
     }
 
-
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        Log.d("TAG",requestCode.toString())
         if (requestCode == REQUEST_CODE) {
-            val account = GoogleSignIn.getSignedInAccountFromIntent(data).result
-            account?.let {
-                viewModel.loginWithGoogle(it)
+            try {
+                val account = GoogleSignIn.getSignedInAccountFromIntent(data).result
+                Log.d("TAG",account.toString())
+                account?.let {
+                    viewModel.loginWithGoogle(it)
+                }
+            } catch (e: Exception) {
+                Log.d("TAG",e.message.toString())
             }
-        }
-    }
-
-
-    private fun result(string: String): Resource<String> {
-        if (!Patterns.EMAIL_ADDRESS.matcher(string).matches()) {
-            return Resource.Error(getString(R.string.error_not_a_valid_email))
-        } else {
-            return Resource.Success("")
         }
     }
 }

@@ -8,6 +8,7 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.Dispatchers
@@ -22,22 +23,6 @@ class DefaultAuthRepository : AuthRepository {
     val users = FirebaseFirestore.getInstance().collection("users")
     val executor = Executors.newSingleThreadExecutor()
 
-    override suspend fun register(
-        email: String,
-        username: String,
-        password: String
-    ): Resource<AuthResult> {
-        return withContext(Dispatchers.IO) {
-            safeCall {
-                val result = auth.createUserWithEmailAndPassword(email, password).await()
-                val uid = result.user?.uid!!
-                val user = User(uid, username)
-                users.document(uid).set(user).await()
-                Resource.Success(result)
-            }
-        }
-    }
-
     override fun registerRx(email: String, username: String, password: String): Single<AuthResult> {
         return Single.create { emiter ->
             auth.createUserWithEmailAndPassword(email, password)
@@ -50,40 +35,29 @@ class DefaultAuthRepository : AuthRepository {
                     } else {
                         emiter.onError(task.exception)
                     }
-
-            }
-
-        }
-    }
-
-    override suspend fun login(email: String, password: String): Resource<AuthResult> {
-        return withContext(Dispatchers.IO) {
-            safeCall {
-                val result = auth.signInWithEmailAndPassword(email, password).await()
-                Resource.Success(result)
             }
         }
     }
 
-    override suspend fun loginWithGoogle(credential: AuthCredential): Resource<AuthResult> {
-        return withContext(Dispatchers.IO) {
-            safeCall {
-                val result = auth.signInWithCredential(credential).await()
-                Resource.Success(result)
-            }
-        }
-    }
-
-    override suspend fun resetPassword(email: String) {
-        auth.sendPasswordResetEmail(email)
-    }
-
-    override fun restPasswordRx(email: String): Single<Void> {
+    override fun loginWithGoogle(credential: AuthCredential): Single<AuthResult> {
         return Single.create { emiter ->
+            auth.signInWithCredential(credential)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        emiter.onSuccess(task.result)
+                    } else {
+                        emiter.onError(task.exception)
+                    }
+                }
+        }
+    }
+
+    override fun restPasswordRx(email: String): Completable {
+        return Completable.create { emiter ->
             auth.sendPasswordResetEmail(email)
                 .addOnCompleteListener(executor) { task ->
                     if (task.isSuccessful) {
-                        emiter.onSuccess(task.result)
+                        emiter.onComplete()
                     } else {
                         emiter.onError(task.exception)
                     }
@@ -105,7 +79,6 @@ class DefaultAuthRepository : AuthRepository {
                 }
         }
     }
-
 }
 
 

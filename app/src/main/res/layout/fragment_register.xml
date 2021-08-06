@@ -46,7 +46,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInput1"
+            android:id="@+id/textInputRegisterEmail"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInput2"
+            android:id="@+id/textInputRegisterUsername"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInput1">
+            app:layout_constraintTop_toBottomOf="@+id/textInputRegisterEmail">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edRegisterUsername"
@@ -94,7 +94,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInput3"
+            android:id="@+id/textInputRegisterPassword"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
@@ -104,7 +104,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:counterEnabled="true"
             app:startIconDrawable="@drawable/ic_baseline_lock_24"
-            app:layout_constraintTop_toBottomOf="@+id/textInput2"
+            app:layout_constraintTop_toBottomOf="@+id/textInputRegisterUsername"
             app:passwordToggleEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -120,7 +120,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInput4"
+            android:id="@+id/textInputRegisterRepeatPassword"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
@@ -131,7 +131,7 @@
             app:passwordToggleEnabled="true"
             app:startIconDrawable="@drawable/ic_baseline_lock_24"
             app:counterEnabled="true"
-            app:layout_constraintTop_toBottomOf="@+id/textInput3">
+            app:layout_constraintTop_toBottomOf="@+id/textInputRegisterPassword">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edRegisterRepeatedPassword"
@@ -156,7 +156,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInput4">
+            app:layout_constraintTop_toBottomOf="@+id/textInputRegisterRepeatPassword">
 
         </androidx.appcompat.widget.AppCompatButton>
 
@@ -169,11 +169,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInput4" />
-
-
-
-
+            app:layout_constraintTop_toBottomOf="@+id/textInputRegisterRepeatPassword" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
