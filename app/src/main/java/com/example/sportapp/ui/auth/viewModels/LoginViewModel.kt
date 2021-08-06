@@ -43,6 +43,8 @@ class LoginViewModel @ViewModelInject constructor(
     val _loginEmail = BehaviorSubject.create<String>()
     val loginEmail = BehaviorSubject.create<Resource<String>>()
 
+    val logIn = BehaviorSubject.createDefault(false)
+
     init {
        val emailSubject = _loginEmail
             .subscribeOn(AndroidSchedulers.mainThread())
@@ -71,23 +73,26 @@ class LoginViewModel @ViewModelInject constructor(
         }).subscribe({
             loginButtonEnabled.onNext(it)
         },{},{})
-    }
 
-    fun loginRX(email: String,password: String) {
-       repository.loginRx(email,password)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe {
-                _loginStatus.postValue(Resource.Loading())
+
+        logIn.subscribe({
+            if (it) {
+                repository.loginRx(_loginEmail.value,_loginPassword.value)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnSubscribe {
+                        _loginStatus.postValue(Resource.Loading())
+                    }
+                    .doOnDispose {
+                        _loginStatus.postValue(Resource.Error("Canceled"))
+                    }
+                    .subscribe({
+                        _loginStatus.postValue(Resource.Success(it))
+                    }, {
+                        _loginStatus.postValue(Resource.Error(it.message ?: ""))
+                    })
             }
-            .doOnDispose {
-                _loginStatus.postValue(Resource.Error("Canceled"))
-            }
-            .subscribe({
-                _loginStatus.postValue(Resource.Success(it))
-            }, {
-                _loginStatus.postValue(Resource.Error(it.message ?: ""))
-            })
+        },{})
     }
 
     fun loginWithGoogle(account: GoogleSignInAccount) {

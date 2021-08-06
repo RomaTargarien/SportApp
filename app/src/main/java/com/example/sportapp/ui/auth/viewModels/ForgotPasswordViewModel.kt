@@ -26,6 +26,8 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
 
     val resetPasswordButtonEnabled = BehaviorSubject.createDefault(false)
 
+    val buttonResetPassword = BehaviorSubject.createDefault(false)
+
     init {
         val emailResetSubject = _emailReset
             .subscribeOn(AndroidSchedulers.mainThread())
@@ -38,11 +40,9 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
         emailResetSubject.subscribe(emailReset)
 
         emailResetSubject.subscribe { resetPasswordButtonEnabled.onNext(it is Resource.Success) }
-    }
 
-    fun resetPasswordRx(email: String) {
-        if (!email.isEmpty()) {
-            repository.restPasswordRx(email)
+        buttonResetPassword.subscribe({
+            repository.restPasswordRx(_emailReset.value)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -50,8 +50,8 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
                 }, {
                     _passwordResetStatus.postValue(Resource.Error(it.message ?: ""))
                 })
-        } else {
-            _passwordResetStatus.postValue(Resource.Error(applicationContext.getString(R.string.error_input_empty)))
-        }
+        },{})
+
+
     }
 }

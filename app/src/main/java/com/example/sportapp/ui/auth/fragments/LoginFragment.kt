@@ -39,6 +39,7 @@ class LoginFragment : Fragment() {
 
     private lateinit var binding: FragmentLoginBinding
     private lateinit var viewModel: LoginViewModel
+    private lateinit var subscriptionEmail: Pair<Disposable,Disposable>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -66,7 +67,7 @@ class LoginFragment : Fragment() {
 
 
         //editTextLoginEmail
-        binding.textInputLoginEmail.textInputBehavior(
+        subscriptionEmail = binding.textInputLoginEmail.textInputBehavior(
             subjectInput = viewModel._loginEmail,
             subjectOutput = viewModel.loginEmail)
 
@@ -82,14 +83,8 @@ class LoginFragment : Fragment() {
         },{})
 
         binding.bnLogIn.setOnClickListener {
-            Log.d("TAG","clicked")
-            viewModel.loginRX(
-                email = binding.edLoginEmail.text.toString(),
-                password = binding.edLoginPassword.text.toString()
-            )
+            viewModel.logIn.onNext(true)
         }
-
-
 
         binding.bnGoogleSignIn.setOnClickListener {
             val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -138,6 +133,12 @@ class LoginFragment : Fragment() {
                 Log.d("TAG",e.message.toString())
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        subscriptionEmail.first.dispose()
+        subscriptionEmail.second.dispose()
     }
 }
 

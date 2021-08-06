@@ -55,11 +55,7 @@ class RegisterFragment : Fragment() {
         },{},{})
 
         binding.bnRegister.setOnClickListener {
-            viewModel.registerRx(
-                email = binding.edRegisterEmail.text.toString(),
-                username = binding.edRegisterUsername.text.toString(),
-                password = binding.edRegisterPassword.text.toString(),
-            )
+            viewModel.buttonSignIn.onNext(true)
         }
 
         return binding.root

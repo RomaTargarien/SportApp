@@ -40,6 +40,8 @@ class RegisterViewModel @ViewModelInject constructor(
 
     val buttonSignInEnabled = BehaviorSubject.createDefault(false)
 
+    val buttonSignIn = BehaviorSubject.createDefault(false)
+
     init {
         val emailSubject = _registerEmail
             .subscribeOn(AndroidSchedulers.mainThread())
@@ -109,17 +111,19 @@ class RegisterViewModel @ViewModelInject constructor(
         }.subscribe({
             buttonSignInEnabled.onNext(it)
         },{})
-    }
 
-    fun registerRx(email: String, username: String, password: String) {
-        _registerStatus.postValue(Resource.Loading())
-        repository.registerRx(email, username, password)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                _registerStatus.postValue(Resource.Success(it))
-            }, {
-                _registerStatus.postValue(Resource.Error(it.message ?: ""))
-            })
+        buttonSignIn.subscribe({
+            if (it) {
+                _registerStatus.postValue(Resource.Loading())
+                repository.registerRx(_registerEmail.value, _registerUserName.value, _registerPassword.value)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe({
+                        _registerStatus.postValue(Resource.Success(it))
+                    }, {
+                        _registerStatus.postValue(Resource.Error(it.message ?: ""))
+                    })
+            }
+        },{})
     }
 }

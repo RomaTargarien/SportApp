@@ -42,7 +42,7 @@ class ForgotPasswordFragment : Fragment() {
         },{})
 
         binding.bnForgotPassword.setOnClickListener {
-            viewModel.resetPasswordRx(binding.edForgotPasswordEmail.text.toString())
+            viewModel.buttonResetPassword.onNext(true)
         }
         return binding.root
     }
