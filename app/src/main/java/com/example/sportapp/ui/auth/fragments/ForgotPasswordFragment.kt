@@ -21,8 +21,6 @@ class ForgotPasswordFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        observe()
     }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,15 +42,10 @@ class ForgotPasswordFragment : Fragment() {
         binding.bnForgotPassword.setOnClickListener {
             viewModel.buttonResetPassword.onNext(true)
         }
-        return binding.root
-    }
+        viewModel.snackBarMessage.subscribe({
+            snackbar(it)
+        },{})
 
-    fun observe() {
-        viewModel.passwordResetStatus.observe(viewLifecycleOwner) {
-            when (it) {
-                is Resource.Success -> {snackbar(it.data ?: "")}
-                is Resource.Error -> {snackbar(it.message ?: "")}
-            }
-        }
+        return binding.root
     }
 }

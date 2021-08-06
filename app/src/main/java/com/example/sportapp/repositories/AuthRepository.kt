@@ -14,7 +14,7 @@ interface AuthRepository {
 
     fun loginRx(email: String,password: String): Single<AuthResult>
 
-    fun restPasswordRx(email: String): Completable
+    fun restPasswordRx(email: String): Single<Void>
 
     fun registerRx(email: String,username: String,password: String) : Single<AuthResult>
 }

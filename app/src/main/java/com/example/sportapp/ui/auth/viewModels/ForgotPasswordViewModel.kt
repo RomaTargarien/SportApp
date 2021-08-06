@@ -1,6 +1,7 @@
 package com.example.sportapp.ui.auth.viewModels
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -18,8 +19,8 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
     private val repository: AuthRepository,
     private val applicationContext: Context
 ): ViewModel() {
-    private val _passwordResetStatus = MutableLiveData<Resource<String>>()
-    val passwordResetStatus: LiveData<Resource<String>> = _passwordResetStatus
+
+    val passwordResetStatus = BehaviorSubject.create<Resource<String>>()
 
     val _emailReset = BehaviorSubject.create<String>()
     val emailReset = BehaviorSubject.create<Resource<String>>()
@@ -27,6 +28,8 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
     val resetPasswordButtonEnabled = BehaviorSubject.createDefault(false)
 
     val buttonResetPassword = BehaviorSubject.createDefault(false)
+
+    val snackBarMessage = BehaviorSubject.create<String>()
 
     init {
         val emailResetSubject = _emailReset
@@ -42,14 +45,26 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
         emailResetSubject.subscribe { resetPasswordButtonEnabled.onNext(it is Resource.Success) }
 
         buttonResetPassword.subscribe({
-            repository.restPasswordRx(_emailReset.value)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    _passwordResetStatus.postValue(Resource.Success("Password reset link was sent to your email"))
-                }, {
-                    _passwordResetStatus.postValue(Resource.Error(it.message ?: ""))
-                })
+            if (it) {
+                repository.restPasswordRx(_emailReset.value)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe({
+                        passwordResetStatus.onNext(Resource.Success("Password reset link was sent to your email"))
+                        Log.d("TAG","Success")
+                    }, {
+                        Log.d("TAG","Error")
+                        passwordResetStatus.onNext(Resource.Error(it.message ?: ""))
+                    })
+            }
+        },{})
+
+        passwordResetStatus.subscribe({
+            Log.d("TAG",it.toString())
+            when (it) {
+                is Resource.Success -> {snackBarMessage.onNext(it.message)}
+                is Resource.Error -> {snackBarMessage.onNext(it.message)}
+            }
         },{})
 
 

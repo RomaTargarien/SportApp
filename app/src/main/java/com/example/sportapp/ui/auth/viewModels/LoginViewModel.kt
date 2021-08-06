@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sportapp.R
 import com.example.sportapp.other.Resource
 import com.example.sportapp.other.validateEmail
 import com.example.sportapp.other.validatePassword
@@ -17,6 +18,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -30,69 +32,88 @@ class LoginViewModel @ViewModelInject constructor(
     private val applicationContext: Context
 ): ViewModel() {
 
-    val _loginStatus = MutableLiveData<Resource<AuthResult>>()
-    val loginStatus: LiveData<Resource<AuthResult>> = _loginStatus
+    val loginStatus = BehaviorSubject.create<Resource<AuthResult>>()
 
     val _loginPassword = BehaviorSubject.create<String>()
     val loginPassword = BehaviorSubject.create<Resource<String>>()
 
     val loginButtonEnabled = BehaviorSubject.createDefault(false)
 
-    val isSnackbarShown = PublishSubject.create<Boolean>()
+    val isProgressBarShown = BehaviorSubject.create<Boolean>()
+
+    val snackBarMessage = PublishSubject.create<String>()
 
     val _loginEmail = BehaviorSubject.create<String>()
     val loginEmail = BehaviorSubject.create<Resource<String>>()
 
-    val logIn = BehaviorSubject.createDefault(false)
+    val logIn = PublishSubject.create<Void>()
 
     init {
        val emailSubject = _loginEmail
             .subscribeOn(AndroidSchedulers.mainThread())
-            .debounce(1000,TimeUnit.MILLISECONDS)
             .distinctUntilChanged()
+            .debounce(1000,TimeUnit.MILLISECONDS)
+            .share()
+
+        emailSubject
             .observeOn(Schedulers.computation())
             .map { it.validateEmail(applicationContext) }
             .observeOn(AndroidSchedulers.mainThread())
-            .share()
-
-        emailSubject.subscribe(loginEmail)
+            .subscribe(loginEmail)
 
         val passwordSubject = _loginPassword
             .subscribeOn(AndroidSchedulers.mainThread())
-            .debounce(1000,TimeUnit.MILLISECONDS)
             .distinctUntilChanged()
+            .debounce(1000,TimeUnit.MILLISECONDS)
+            .share()
+
+        passwordSubject
             .observeOn(Schedulers.computation())
             .map { it.validatePassword(applicationContext) }
             .observeOn(AndroidSchedulers.mainThread())
-            .share()
+            .subscribe(loginPassword)
 
-        passwordSubject.subscribe(loginPassword)
-
-        Observable.combineLatest(emailSubject,passwordSubject, { first,second ->
+        Observable.combineLatest(loginEmail,loginPassword, { first,second ->
             first is Resource.Success && second is Resource.Success
         }).subscribe({
             loginButtonEnabled.onNext(it)
         },{},{})
 
+        loginStatus.subscribe({
+            when (it) {
+                is Resource.Success -> {isProgressBarShown.onNext(false)}
+                is Resource.Error -> {isProgressBarShown.onNext(false)}
+                is Resource.Loading -> {isProgressBarShown.onNext(true)}
+            }
+        },{})
+        loginStatus.subscribe({
+            when (it) {
+                is Resource.Success -> {snackBarMessage.onNext(applicationContext.getString(R.string.successfully_log))}
+                is Resource.Error -> {snackBarMessage.onNext(it.message ?: "")}
+            }
+        },{})
 
-        logIn.subscribe({
-            if (it) {
-                repository.loginRx(_loginEmail.value,_loginPassword.value)
+        Observable.combineLatest(logIn, emailSubject, passwordSubject) { _, email, password ->
+            Pair(email, password)
+        }
+            .switchMapSingle {
+                repository.loginRx(it.first, it.second)
+            }
+
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe {
-                        _loginStatus.postValue(Resource.Loading())
+                        loginStatus.onNext(Resource.Loading())
                     }
                     .doOnDispose {
-                        _loginStatus.postValue(Resource.Error("Canceled"))
+                        loginStatus.onNext(Resource.Error("Canceled"))
                     }
                     .subscribe({
-                        _loginStatus.postValue(Resource.Success(it))
+                        loginStatus.onNext(Resource.Success(it))
                     }, {
-                        _loginStatus.postValue(Resource.Error(it.message ?: ""))
+                        loginStatus.onNext(Resource.Error(it.message ?: ""))
                     })
-            }
-        },{})
+
     }
 
     fun loginWithGoogle(account: GoogleSignInAccount) {
@@ -101,9 +122,9 @@ class LoginViewModel @ViewModelInject constructor(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                _loginStatus.postValue(Resource.Success(it))
+                loginStatus.onNext(Resource.Success(it))
             },{
-                _loginStatus.postValue(Resource.Error("Log in failed"))
+                loginStatus.onNext(Resource.Error("Log in failed"))
             })
     }
 }

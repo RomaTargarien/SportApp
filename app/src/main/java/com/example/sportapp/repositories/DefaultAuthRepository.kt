@@ -52,12 +52,12 @@ class DefaultAuthRepository : AuthRepository {
         }
     }
 
-    override fun restPasswordRx(email: String): Completable {
-        return Completable.create { emiter ->
+    override fun restPasswordRx(email: String): Single<Void> {
+        return Single.create { emiter ->
             auth.sendPasswordResetEmail(email)
                 .addOnCompleteListener(executor) { task ->
-                    if (task.isSuccessful) {
-                        emiter.onComplete()
+                    if (task.isComplete) {
+                        emiter.onSuccess(task.result)
                     } else {
                         emiter.onError(task.exception)
                     }

@@ -21,7 +21,6 @@ class RegisterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        observe()
     }
 
     override fun onCreateView(
@@ -48,7 +47,6 @@ class RegisterFragment : Fragment() {
             subjectOutput = viewModel.registerRepeatPassword
         )
 
-        //buttonRegister
         viewModel.buttonSignInEnabled.subscribe( {
             binding.bnRegister.alpha = if (it) 1f else 0.7f
             binding.bnRegister.isEnabled = it
@@ -58,27 +56,15 @@ class RegisterFragment : Fragment() {
             viewModel.buttonSignIn.onNext(true)
         }
 
-        return binding.root
-    }
+        viewModel.isProgressBarShown.subscribe({
+            binding.registerProgressBar.isVisible = it
+        },{})
 
-    fun observe() {
-        viewModel.registerStatus.observe(viewLifecycleOwner) {
-            it.let { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        binding.registerProgressBar.isVisible = false
-                        snackbar(getString(R.string.successfully_register))
-                    }
-                    is Resource.Error -> {
-                        binding.registerProgressBar.isVisible = false
-                        result.message?.let { snackbar(it) }
-                    }
-                    is Resource.Loading -> {
-                        binding.registerProgressBar.isVisible = true
-                    }
-                }
-            }
-        }
+        viewModel.snackBarMessage.subscribe({
+            snackbar(it)
+        },{})
+
+        return binding.root
     }
 }
 

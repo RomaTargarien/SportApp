@@ -48,14 +48,12 @@ class LoginFragment : Fragment() {
             findNavController().navigate(
                 LoginFragmentDirections.actionLoginFragmentToRegisterFragment()
             )
-            viewModel._loginStatus.postValue(null)
         }
         binding.tvForgotPassword.setOnClickListener {
             findNavController().navigate(
                 LoginFragmentDirections.actionLoginFragmentToForgotPasswordFragment()
             )
         }
-        observe()
     }
 
     override fun onCreateView(
@@ -83,7 +81,7 @@ class LoginFragment : Fragment() {
         },{})
 
         binding.bnLogIn.setOnClickListener {
-            viewModel.logIn.onNext(true)
+            viewModel.logIn.onNext(null)
         }
 
         binding.bnGoogleSignIn.setOnClickListener {
@@ -96,27 +94,15 @@ class LoginFragment : Fragment() {
                 startActivityForResult(it,REQUEST_CODE)
             }
         }
-        return binding.root
-    }
+        viewModel.isProgressBarShown.subscribe({
+            binding.loginProgressBar.isVisible = it
+        },{})
 
-    fun observe() {
-        viewModel.loginStatus.observe(viewLifecycleOwner) {
-            it.let { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        binding.loginProgressBar.isVisible = false
-                        snackbar(getString(R.string.successfully_log))
-                    }
-                    is Resource.Error -> {
-                        binding.loginProgressBar.isVisible = false
-                        result.message?.let { snackbar(it) }
-                    }
-                    is Resource.Loading -> {
-                        binding.loginProgressBar.isVisible = true
-                    }
-                }
-            }
-        }
+        viewModel.snackBarMessage.subscribe({
+            snackbar(it)
+        },{})
+
+        return binding.root
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

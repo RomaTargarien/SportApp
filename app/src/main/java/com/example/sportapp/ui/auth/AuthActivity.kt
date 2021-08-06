@@ -33,16 +33,17 @@ class AuthActivity : AppCompatActivity() {
         if (FirebaseAuth.getInstance().currentUser != null) {
             enter()
         }
-        viewModelLogin.loginStatus.observe(this) {
+        viewModelLogin.loginStatus.subscribe({
             if (it is Resource.Success) {
                 enter()
             }
-        }
-        viewModelRegister.registerStatus.observe(this) {
+        },{ })
+
+        viewModelRegister.registerStatus.subscribe({
             if (it is Resource.Success) {
                 enter()
             }
-        }
+        },{})
     }
     fun enter() {
         Intent(this, MainActivity::class.java).also {

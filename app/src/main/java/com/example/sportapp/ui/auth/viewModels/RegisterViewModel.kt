@@ -15,6 +15,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -23,8 +24,7 @@ class RegisterViewModel @ViewModelInject constructor(
     private val applicationContext: Context
 ): ViewModel() {
 
-    private val _registerStatus = MutableLiveData<Resource<AuthResult>>()
-    val registerStatus: LiveData<Resource<AuthResult>> = _registerStatus
+    val registerStatus = BehaviorSubject.create<Resource<AuthResult>>()
 
     val _registerEmail = BehaviorSubject.create<String>()
     val registerEmail = BehaviorSubject.create<Resource<String>>()
@@ -41,6 +41,10 @@ class RegisterViewModel @ViewModelInject constructor(
     val buttonSignInEnabled = BehaviorSubject.createDefault(false)
 
     val buttonSignIn = BehaviorSubject.createDefault(false)
+
+    val isProgressBarShown = PublishSubject.create<Boolean>()
+
+    val snackBarMessage = BehaviorSubject.create<String>()
 
     init {
         val emailSubject = _registerEmail
@@ -114,15 +118,29 @@ class RegisterViewModel @ViewModelInject constructor(
 
         buttonSignIn.subscribe({
             if (it) {
-                _registerStatus.postValue(Resource.Loading())
+                registerStatus.onNext(Resource.Loading())
                 repository.registerRx(_registerEmail.value, _registerUserName.value, _registerPassword.value)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({
-                        _registerStatus.postValue(Resource.Success(it))
+                        registerStatus.onNext(Resource.Success(it))
                     }, {
-                        _registerStatus.postValue(Resource.Error(it.message ?: ""))
+                        registerStatus.onNext(Resource.Error(it.message ?: ""))
                     })
+            }
+        },{})
+
+        registerStatus.subscribe({
+            when (it) {
+                is Resource.Success -> {isProgressBarShown.onNext(false)}
+                is Resource.Error -> {isProgressBarShown.onNext(false)}
+                is Resource.Loading -> {isProgressBarShown.onNext(true)}
+            }
+        },{})
+        registerStatus.subscribe({
+            when (it) {
+                is Resource.Success -> {snackBarMessage.onNext(applicationContext.getString(R.string.successfully_log))}
+                is Resource.Error -> {snackBarMessage.onNext(it.message ?: "")}
             }
         },{})
     }
