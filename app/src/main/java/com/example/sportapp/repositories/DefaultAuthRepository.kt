@@ -52,13 +52,15 @@ class DefaultAuthRepository : AuthRepository {
         }
     }
 
-    override fun restPasswordRx(email: String): Single<Void> {
-        return Single.create { emiter ->
+    override fun restPasswordRx(email: String): Completable {
+        return Completable.create { emiter ->
             auth.sendPasswordResetEmail(email)
                 .addOnCompleteListener(executor) { task ->
-                    if (task.isComplete) {
-                        emiter.onSuccess(task.result)
+                    if (task.isSuccessful) {
+                        Log.d("TAG","complete")
+                        emiter.onComplete()
                     } else {
+                        Log.d("TAG","err")
                         emiter.onError(task.exception)
                     }
                 }
@@ -70,10 +72,8 @@ class DefaultAuthRepository : AuthRepository {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(executor) { task ->
                     if (task.isSuccessful) {
-                        Log.d("TAG",task.isSuccessful.toString())
                         emiter.onSuccess(task.result)
                     } else {
-                        Log.d("TAG",task.isCanceled.toString())
                         emiter.onError(task.exception)
                     }
                 }

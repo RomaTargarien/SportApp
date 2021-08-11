@@ -10,14 +10,17 @@ import com.example.sportapp.R
 import com.example.sportapp.other.Resource
 import com.example.sportapp.other.validateEmail
 import com.example.sportapp.repositories.AuthRepository
+import com.example.sportapp.ui.auth.Router
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import java.util.concurrent.TimeUnit
 
 class ForgotPasswordViewModel @ViewModelInject constructor(
     private val repository: AuthRepository,
-    private val applicationContext: Context
+    private val applicationContext: Context,
 ): ViewModel() {
 
     val passwordResetStatus = BehaviorSubject.create<Resource<String>>()
@@ -27,46 +30,47 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
 
     val resetPasswordButtonEnabled = BehaviorSubject.createDefault(false)
 
-    val buttonResetPassword = BehaviorSubject.createDefault(false)
+    val buttonResetPassword = BehaviorSubject.create<Unit>()
 
     val snackBarMessage = BehaviorSubject.create<String>()
 
     init {
         val emailResetSubject = _emailReset
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .debounce(1000, TimeUnit.MILLISECONDS)
             .distinctUntilChanged()
+            .doOnNext { resetPasswordButtonEnabled.onNext(false) }
+            .debounce(1000, TimeUnit.MILLISECONDS)
             .observeOn(Schedulers.computation())
-            .map { it.validateEmail(applicationContext) }
+            .map { Pair(it,it.validateEmail(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
             .share()
-        emailResetSubject.subscribe(emailReset)
 
-        emailResetSubject.subscribe { resetPasswordButtonEnabled.onNext(it is Resource.Success) }
-
-        buttonResetPassword.subscribe({
-            if (it) {
-                repository.restPasswordRx(_emailReset.value)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({
-                        passwordResetStatus.onNext(Resource.Success("Password reset link was sent to your email"))
-                        Log.d("TAG","Success")
-                    }, {
-                        Log.d("TAG","Error")
-                        passwordResetStatus.onNext(Resource.Error(it.message ?: ""))
-                    })
-            }
+        emailResetSubject.subscribe({
+            emailReset.onNext(it.second)
         },{})
 
+        emailResetSubject.subscribe {
+            Log.d("TAG",it.first)
+            resetPasswordButtonEnabled.onNext(it.second is Resource.Success)
+        }
+
+        buttonResetPassword
+            .withLatestFrom(emailResetSubject) {_,email -> email.first}
+            .observeOn(Schedulers.io())
+            .flatMap {
+                repository.restPasswordRx(it)
+                .andThen<Resource<String>>(Observable.just(Resource.Success(applicationContext.getString(R.string.go_to_email))))
+                .onErrorReturn {
+                    Resource.Error(it.localizedMessage ?: "")
+                }
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(passwordResetStatus)
+
         passwordResetStatus.subscribe({
-            Log.d("TAG",it.toString())
             when (it) {
-                is Resource.Success -> {snackBarMessage.onNext(it.message)}
+                is Resource.Success -> {snackBarMessage.onNext(it.data)}
                 is Resource.Error -> {snackBarMessage.onNext(it.message)}
             }
         },{})
-
-
     }
 }

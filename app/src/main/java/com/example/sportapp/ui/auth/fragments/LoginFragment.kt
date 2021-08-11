@@ -1,15 +1,14 @@
 package com.example.sportapp.ui.auth.fragments
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
-import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -17,21 +16,12 @@ import androidx.navigation.fragment.findNavController
 import com.example.sportapp.R
 import com.example.sportapp.databinding.FragmentLoginBinding
 import com.example.sportapp.other.*
-import com.example.sportapp.other.Constants.REQUEST_CODE
 import com.example.sportapp.ui.auth.viewModels.LoginViewModel
+import com.example.sportapp.ui.auth.Router
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
-import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.ObservableEmitter
 import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.plugins.RxJavaPlugins
-import io.reactivex.rxjava3.schedulers.Schedulers
-import io.reactivex.rxjava3.subjects.BehaviorSubject
-import java.util.concurrent.TimeUnit
 
 
 @AndroidEntryPoint
@@ -50,9 +40,7 @@ class LoginFragment : Fragment() {
             )
         }
         binding.tvForgotPassword.setOnClickListener {
-            findNavController().navigate(
-                LoginFragmentDirections.actionLoginFragmentToForgotPasswordFragment()
-            )
+            Router(findNavController()).goToForgotPasswordScreen()
         }
     }
 
@@ -72,8 +60,8 @@ class LoginFragment : Fragment() {
         //editTextLoginPassword
         binding.textInputLoginPassword.textInputBehavior(
             subjectInput = viewModel._loginPassword,
-            subjectOutput = viewModel.loginPassword
-        )
+            subjectOutput = viewModel.loginPassword)
+
         //buttonLogIn
         viewModel.loginButtonEnabled.subscribe({
             binding.bnLogIn.alpha = if (it) 1f else 0.7f
@@ -81,7 +69,7 @@ class LoginFragment : Fragment() {
         },{})
 
         binding.bnLogIn.setOnClickListener {
-            viewModel.logIn.onNext(null)
+            viewModel.logIn.onNext(Unit)
         }
 
         binding.bnGoogleSignIn.setOnClickListener {
@@ -90,9 +78,7 @@ class LoginFragment : Fragment() {
                 .requestEmail()
                 .build()
             val signInClient = GoogleSignIn.getClient(requireContext(),options)
-            signInClient.signInIntent.also {
-                startActivityForResult(it,REQUEST_CODE)
-            }
+            resultLauncher.launch(Intent(signInClient.signInIntent))
         }
         viewModel.isProgressBarShown.subscribe({
             binding.loginProgressBar.isVisible = it
@@ -105,26 +91,26 @@ class LoginFragment : Fragment() {
         return binding.root
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        Log.d("TAG",requestCode.toString())
-        if (requestCode == REQUEST_CODE) {
-            try {
-                val account = GoogleSignIn.getSignedInAccountFromIntent(data).result
-                Log.d("TAG",account.toString())
-                account?.let {
-                    viewModel.loginWithGoogle(it)
+    val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
+        ActivityResultCallback {
+            if (it.resultCode == Activity.RESULT_OK) {
+                val intent = it.data
+                try {
+                    val account = GoogleSignIn.getSignedInAccountFromIntent(intent).result
+                    account?.let {
+                        viewModel.loginWithGoogle(it)
+                    }
+                } catch (e: Exception) {
+                    Log.d("TAG",e.message.toString())
                 }
-            } catch (e: Exception) {
-                Log.d("TAG",e.message.toString())
             }
-        }
-    }
+        })
 
     override fun onStop() {
         super.onStop()
         subscriptionEmail.first.dispose()
         subscriptionEmail.second.dispose()
+
     }
 }
 

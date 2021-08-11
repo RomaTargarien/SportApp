@@ -2,6 +2,7 @@ package com.example.sportapp.other
 
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import com.google.android.material.textfield.TextInputLayout
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
@@ -16,9 +17,7 @@ fun TextInputLayout.observe(): Observable<String> {
                 i: Int,
                 i1: Int,
                 i2: Int
-            ) {
-                this@observe.setErrorEnabled(false)
-            }
+            ) {}
 
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
                 this@observe.setErrorEnabled(false)

@@ -1,6 +1,7 @@
 package com.example.sportapp.ui.auth.fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -35,12 +36,13 @@ class ForgotPasswordFragment : Fragment() {
             subjectOutput = viewModel.emailReset
         )
         viewModel.resetPasswordButtonEnabled.subscribe({
+            Log.d("TAG","${it.toString()}")
             binding.bnForgotPassword.alpha = if (it) 1f else 0.7f
             binding.bnForgotPassword.isEnabled = it
         },{})
 
         binding.bnForgotPassword.setOnClickListener {
-            viewModel.buttonResetPassword.onNext(true)
+            viewModel.buttonResetPassword.onNext(Unit)
         }
         viewModel.snackBarMessage.subscribe({
             snackbar(it)

@@ -81,6 +81,7 @@
             app:startIconDrawable="@drawable/ic_baseline_email_24">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:text="roma@mail.ru"
                 android:id="@+id/edLoginEmail"
                 android:layout_width="360dp"
                 android:layout_height="wrap_content"
@@ -105,6 +106,7 @@
             app:passwordToggleEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:text="11111111"
                 android:id="@+id/edLoginPassword"
                 android:layout_width="360dp"
                 android:layout_height="wrap_content"

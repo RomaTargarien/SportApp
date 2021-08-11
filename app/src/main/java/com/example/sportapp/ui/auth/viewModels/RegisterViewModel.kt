@@ -40,7 +40,7 @@ class RegisterViewModel @ViewModelInject constructor(
 
     val buttonSignInEnabled = BehaviorSubject.createDefault(false)
 
-    val buttonSignIn = BehaviorSubject.createDefault(false)
+    val signIn = BehaviorSubject.create<Unit>()
 
     val isProgressBarShown = PublishSubject.create<Boolean>()
 
@@ -48,87 +48,91 @@ class RegisterViewModel @ViewModelInject constructor(
 
     init {
         val emailSubject = _registerEmail
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .debounce(1000, TimeUnit.MILLISECONDS)
             .distinctUntilChanged()
+            .doOnNext{ buttonSignInEnabled.onNext(false) }
+            .debounce(1000, TimeUnit.MILLISECONDS)
             .observeOn(Schedulers.computation())
-            .map { it.validateEmail(applicationContext) }
+            .map { Pair(it,it.validateEmail(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
             .share()
-        emailSubject.subscribe(registerEmail)
+
+        emailSubject.subscribe {
+            registerEmail.onNext(it.second)
+        }
 
         val usernameSubject = _registerUserName
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .debounce(1000, TimeUnit.MILLISECONDS)
             .distinctUntilChanged()
+            .doOnNext{ buttonSignInEnabled.onNext(false) }
+            .debounce(1000, TimeUnit.MILLISECONDS)
             .observeOn(Schedulers.computation())
-            .map { it.validateUsername(applicationContext) }
+            .map { Pair(it,it.validateUsername(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
             .share()
-        usernameSubject.subscribe(registerUserName)
+
+        usernameSubject.subscribe {
+            registerUserName.onNext(it.second)
+        }
 
         val passwordSubject = _registerPassword
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .debounce(1000, TimeUnit.MILLISECONDS)
             .distinctUntilChanged()
-
-        val passwordSubjectValidation = passwordSubject
+            .doOnNext{ buttonSignInEnabled.onNext(false) }
+            .debounce(1000, TimeUnit.MILLISECONDS)
             .observeOn(Schedulers.computation())
-            .map { it.validatePassword(applicationContext) }
+            .map { Pair(it,it.validatePassword(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
             .share()
 
-        passwordSubjectValidation.subscribe(registerPassword)
+        passwordSubject.subscribe {
+            registerPassword.onNext(it.second)
+        }
 
         val repeatedPasswordSubject = _registerRepeatPassword
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .debounce(1000, TimeUnit.MILLISECONDS)
             .distinctUntilChanged()
-
-        val repeatedPasswordSubjectValidaion = repeatedPasswordSubject
+            .doOnNext{ buttonSignInEnabled.onNext(false) }
+            .debounce(1000, TimeUnit.MILLISECONDS)
             .observeOn(Schedulers.computation())
-            .map { it.validatePassword(applicationContext) }
+            .map { Pair(it,it.validatePassword(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
             .share()
 
-        repeatedPasswordSubjectValidaion.subscribe(registerRepeatPassword)
-
-        val comparingPasswords = Observable.combineLatest(
-            passwordSubject,
-            repeatedPasswordSubject
-        ) { first, second ->
-            first.equals(second)
-        }
+       repeatedPasswordSubject.subscribe{
+           registerRepeatPassword.onNext(it.second)
+       }
 
         Observable.combineLatest(
             emailSubject,
             usernameSubject,
-            passwordSubjectValidation,
-            repeatedPasswordSubjectValidaion,
-            comparingPasswords
-        ) { first, second,third, fourth, fifth ->
-            first is Resource.Success && // emailSubject
-                    second is Resource.Success && // usernameSubject
-                    third is Resource.Success && // passwordSubjectValidation
-                    fourth is Resource.Success && // repeatedPasswordSubjectValidaion
-                    fifth // comparingPasswords
+            passwordSubject,
+            repeatedPasswordSubject
+        ) { email, username,password, repPassword->
+            if (!password.first.equals(repPassword.first)) {
+                registerRepeatPassword.onNext(Resource.Error(applicationContext.getString(R.string.error_incorrectly_repeated_password)))
+            }
+                    email.second is Resource.Success &&
+                    username.second is Resource.Success &&
+                    password.second is Resource.Success &&
+                    repPassword.second is Resource.Success &&
+                    password.first.equals(repPassword.first)
         }.subscribe({
             buttonSignInEnabled.onNext(it)
         },{})
 
-        buttonSignIn.subscribe({
-            if (it) {
-                registerStatus.onNext(Resource.Loading())
-                repository.registerRx(_registerEmail.value, _registerUserName.value, _registerPassword.value)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({
-                        registerStatus.onNext(Resource.Success(it))
-                    }, {
-                        registerStatus.onNext(Resource.Error(it.message ?: ""))
-                    })
-            }
-        },{})
+        signIn.withLatestFrom(emailSubject,usernameSubject,passwordSubject) {_,email,userName,password ->
+            Triple(email.first,userName.first,password.first)
+        }
+            .observeOn(Schedulers.io())
+            .flatMapSingle {
+                repository.registerRx(it.first,it.second,it.third)
+                    .map<Resource<AuthResult>> {
+                        Resource.Success(it)
+                    }
+                    .onErrorReturn {
+                        Resource.Error(it.localizedMessage ?: "")
+                    }
+        }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(registerStatus)
+
 
         registerStatus.subscribe({
             when (it) {

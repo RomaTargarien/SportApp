@@ -53,7 +53,7 @@ class RegisterFragment : Fragment() {
         },{},{})
 
         binding.bnRegister.setOnClickListener {
-            viewModel.buttonSignIn.onNext(true)
+            viewModel.signIn.onNext(Unit)
         }
 
         viewModel.isProgressBarShown.subscribe({
