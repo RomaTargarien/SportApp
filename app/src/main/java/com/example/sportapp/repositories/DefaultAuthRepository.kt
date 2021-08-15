@@ -3,7 +3,6 @@ package com.example.sportapp.repositories
 import android.util.Log
 import com.example.sportapp.data.User
 import com.example.sportapp.other.Resource
-import com.example.sportapp.other.safeCall
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
@@ -52,13 +51,13 @@ class DefaultAuthRepository : AuthRepository {
         }
     }
 
-    override fun restPasswordRx(email: String): Completable {
-        return Completable.create { emiter ->
+    override fun restPasswordRx(email: String): Single<Unit> {
+        return Single.create { emiter ->
             auth.sendPasswordResetEmail(email)
                 .addOnCompleteListener(executor) { task ->
                     if (task.isSuccessful) {
                         Log.d("TAG","complete")
-                        emiter.onComplete()
+                        emiter.onSuccess(Unit)
                     } else {
                         Log.d("TAG","err")
                         emiter.onError(task.exception)

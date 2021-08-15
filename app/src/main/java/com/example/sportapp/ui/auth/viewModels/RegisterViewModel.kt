@@ -54,7 +54,7 @@ class RegisterViewModel @ViewModelInject constructor(
             .observeOn(Schedulers.computation())
             .map { Pair(it,it.validateEmail(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
-            .share()
+            .cacheWithInitialCapacity(1)
 
         emailSubject.subscribe {
             registerEmail.onNext(it.second)
@@ -67,7 +67,7 @@ class RegisterViewModel @ViewModelInject constructor(
             .observeOn(Schedulers.computation())
             .map { Pair(it,it.validateUsername(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
-            .share()
+            .cacheWithInitialCapacity(1)
 
         usernameSubject.subscribe {
             registerUserName.onNext(it.second)
@@ -80,7 +80,7 @@ class RegisterViewModel @ViewModelInject constructor(
             .observeOn(Schedulers.computation())
             .map { Pair(it,it.validatePassword(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
-            .share()
+            .cacheWithInitialCapacity(1)
 
         passwordSubject.subscribe {
             registerPassword.onNext(it.second)
@@ -93,7 +93,7 @@ class RegisterViewModel @ViewModelInject constructor(
             .observeOn(Schedulers.computation())
             .map { Pair(it,it.validatePassword(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
-            .share()
+            .cacheWithInitialCapacity(1)
 
        repeatedPasswordSubject.subscribe{
            registerRepeatPassword.onNext(it.second)
@@ -120,16 +120,18 @@ class RegisterViewModel @ViewModelInject constructor(
         signIn.withLatestFrom(emailSubject,usernameSubject,passwordSubject) {_,email,userName,password ->
             Triple(email.first,userName.first,password.first)
         }
+            .distinctUntilChanged()
             .observeOn(Schedulers.io())
             .flatMapSingle {
                 repository.registerRx(it.first,it.second,it.third)
-                    .map<Resource<AuthResult>> {
-                        Resource.Success(it)
-                    }
-                    .onErrorReturn {
-                        Resource.Error(it.localizedMessage ?: "")
-                    }
         }
+            .map {
+                Resource.Success(it)
+            }
+            .doOnError {
+                registerStatus.onNext(Resource.Error(it.localizedMessage ?: ""))
+            }
+            .retry()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(registerStatus)
 

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import com.example.sportapp.R
 import com.example.sportapp.databinding.ActivityAuthBinding
 import com.example.sportapp.other.Resource
@@ -22,6 +23,7 @@ class AuthActivity : AppCompatActivity() {
     private lateinit var viewModelLogin: LoginViewModel
     private lateinit var viewModelRegister: RegisterViewModel
     private lateinit var viewModelForgotPassword: ForgotPasswordViewModel
+    private lateinit var router: IAuthRouter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,26 +31,30 @@ class AuthActivity : AppCompatActivity() {
         viewModelLogin = ViewModelProvider(this).get(LoginViewModel::class.java)
         viewModelRegister = ViewModelProvider(this).get(RegisterViewModel::class.java)
         viewModelForgotPassword = ViewModelProvider(this).get(ForgotPasswordViewModel::class.java)
+        router = AuthRouter(this,MainActivity())
 
         if (FirebaseAuth.getInstance().currentUser != null) {
-            enter()
+            router.enterActivity()
         }
         viewModelLogin.loginStatus.subscribe({
             if (it is Resource.Success) {
-                enter()
+                router.enterActivity()
             }
         },{ })
 
         viewModelRegister.registerStatus.subscribe({
             if (it is Resource.Success) {
-                enter()
+                router.enterActivity()
             }
         },{})
-    }
-    fun enter() {
-        Intent(this, MainActivity::class.java).also {
-            startActivity(it)
-            finish()
-        }
+
+        viewModelLogin.goToForgotPasswordScreen.subscribe({
+            Log.d("TAG","click")
+            router.goToForgotPasswordScreen()
+        },{})
+        viewModelLogin.goToRegisterScreen.subscribe({
+            Log.d("TAG","click2")
+           router.goToRegisterScreen()
+        },{})
     }
 }

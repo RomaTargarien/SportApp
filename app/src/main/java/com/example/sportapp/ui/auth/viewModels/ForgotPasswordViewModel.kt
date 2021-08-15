@@ -10,12 +10,12 @@ import com.example.sportapp.R
 import com.example.sportapp.other.Resource
 import com.example.sportapp.other.validateEmail
 import com.example.sportapp.repositories.AuthRepository
-import com.example.sportapp.ui.auth.Router
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 
 class ForgotPasswordViewModel @ViewModelInject constructor(
@@ -30,7 +30,7 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
 
     val resetPasswordButtonEnabled = BehaviorSubject.createDefault(false)
 
-    val buttonResetPassword = BehaviorSubject.create<Unit>()
+    val buttonResetPassword = PublishSubject.create<Unit>()
 
     val snackBarMessage = BehaviorSubject.create<String>()
 
@@ -42,7 +42,7 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
             .observeOn(Schedulers.computation())
             .map { Pair(it,it.validateEmail(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
-            .share()
+            .cacheWithInitialCapacity(1)
 
         emailResetSubject.subscribe({
             emailReset.onNext(it.second)
@@ -56,13 +56,16 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
         buttonResetPassword
             .withLatestFrom(emailResetSubject) {_,email -> email.first}
             .observeOn(Schedulers.io())
-            .flatMap {
+            .flatMapSingle {
                 repository.restPasswordRx(it)
-                .andThen<Resource<String>>(Observable.just(Resource.Success(applicationContext.getString(R.string.go_to_email))))
-                .onErrorReturn {
-                    Resource.Error(it.localizedMessage ?: "")
-                }
             }
+            .map {
+                Resource.Success(applicationContext.getString(R.string.go_to_email))
+            }
+            .doOnError {
+                passwordResetStatus.onNext(Resource.Error(it.localizedMessage ?: ""))
+            }
+            .retry()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(passwordResetStatus)
 

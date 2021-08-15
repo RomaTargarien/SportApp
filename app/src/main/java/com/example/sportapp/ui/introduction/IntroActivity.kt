@@ -17,11 +17,13 @@ class IntroActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityIntroBinding
     val dots = mutableListOf<TextView>()
+    private lateinit var router: IIntroRouter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityIntroBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        router = IntroRouter(this,AuthActivity())
         val introItems = listOf(
             Intro(R.raw.cup,"Welcome to Sporter", "Invastigate new horizons of sport"),
             Intro(R.raw.tennis,"Everything you need right here", "All sport news in one application, stay in touch and up to date"),
@@ -39,10 +41,7 @@ class IntroActivity : AppCompatActivity() {
             }
         })
         binding.bnGoToAuth.setOnClickListener {
-            Intent(this, AuthActivity::class.java).also {
-                startActivity(it)
-                finish()
-            }
+            router.enterActivity()
         }
     }
     private fun selectedIndicator(position: Int) {

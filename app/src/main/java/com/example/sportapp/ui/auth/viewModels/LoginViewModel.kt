@@ -13,7 +13,6 @@ import com.example.sportapp.other.Resource
 import com.example.sportapp.other.validateEmail
 import com.example.sportapp.other.validatePassword
 import com.example.sportapp.repositories.AuthRepository
-import com.example.sportapp.ui.auth.Router
 import com.example.sportapp.ui.auth.fragments.LoginFragment
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.AuthResult
@@ -52,6 +51,9 @@ class LoginViewModel @ViewModelInject constructor(
 
     val logIn = PublishSubject.create<Unit>()
 
+    val goToRegisterScreen = PublishSubject.create<Unit>()
+    val goToForgotPasswordScreen = PublishSubject.create<Unit>()
+
     init {
        val validatedEmailPair = _loginEmail
             .distinctUntilChanged()
@@ -60,7 +62,7 @@ class LoginViewModel @ViewModelInject constructor(
             .observeOn(Schedulers.computation())
             .map { Pair(it, it.validateEmail(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
-            .share()
+            .cacheWithInitialCapacity(1)
 
         validatedEmailPair.subscribe({ pair ->
             loginEmail.onNext(pair.second)
@@ -73,7 +75,7 @@ class LoginViewModel @ViewModelInject constructor(
             .observeOn(Schedulers.computation())
             .map { Pair(it,it.validatePassword(applicationContext)) }
             .observeOn(AndroidSchedulers.mainThread())
-            .share()
+            .cacheWithInitialCapacity(1)
 
         validatedPasswordPair.subscribe({ pair->
             loginPassword.onNext(pair.second)
@@ -102,17 +104,18 @@ class LoginViewModel @ViewModelInject constructor(
         logIn.withLatestFrom(validatedEmailPair,validatedPasswordPair, { _,emailPair,passwordPair ->
             Pair(emailPair.first,passwordPair.first)
         })
+            .distinctUntilChanged()
             .observeOn(Schedulers.io())
             .flatMap {
                 repository.loginRx(it.first, it.second).toObservable()
-                .map<Resource<AuthResult>> {
-                    Resource.Success(it)
-                }
-                .onErrorReturn {
-                    Resource.Error(it.localizedMessage ?: "")
-                }
-
             }
+            .map {
+                Resource.Success(it)
+            }
+            .doOnError {
+                loginStatus.onNext(Resource.Error(it.localizedMessage ?: ""))
+            }
+            .retry()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(loginStatus)
     }

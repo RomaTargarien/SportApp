@@ -17,7 +17,6 @@ import com.example.sportapp.R
 import com.example.sportapp.databinding.FragmentLoginBinding
 import com.example.sportapp.other.*
 import com.example.sportapp.ui.auth.viewModels.LoginViewModel
-import com.example.sportapp.ui.auth.Router
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,12 +34,10 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.tvRegister.setOnClickListener {
-            findNavController().navigate(
-                LoginFragmentDirections.actionLoginFragmentToRegisterFragment()
-            )
+            viewModel.goToRegisterScreen.onNext(Unit)
         }
         binding.tvForgotPassword.setOnClickListener {
-            Router(findNavController()).goToForgotPasswordScreen()
+            viewModel.goToForgotPasswordScreen.onNext(Unit)
         }
     }
 
