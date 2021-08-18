@@ -6,6 +6,7 @@ import android.util.Log
 import com.google.android.material.textfield.TextInputLayout
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
@@ -48,18 +49,20 @@ fun TextInputLayout.enableError(result: Resource<String>) {
 fun TextInputLayout.textInputBehavior(
     subjectInput: BehaviorSubject<String>,
     subjectOutput: BehaviorSubject<Resource<String>>
-): Pair<Disposable,Disposable> {
-    this.observe().distinctUntilChanged()
-        .subscribe(subjectInput)
+): Triple<Disposable,Disposable,Disposable> {
+    val subsription1 = this.observe().distinctUntilChanged()
+        .subscribe({
+                   subjectInput.onNext(it)
+        },{})
 
-    val subsription1 = subjectOutput.subscribe({
+    val subsription2 = subjectOutput.subscribe({
         this.enableError(it)
     },{})
 
-    val subsription2 = subjectInput.subscribe( {
+    val subsription3 = subjectInput.subscribe( {
         this.editText?.setText(it)
         this.editText?.setSelection(it.length)
     },{},{})
 
-    return Pair(subsription1,subsription2)
+    return Triple(subsription1,subsription2,subsription3)
 }

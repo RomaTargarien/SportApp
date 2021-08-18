@@ -20,6 +20,7 @@ import com.example.sportapp.ui.auth.viewModels.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 
 
@@ -29,6 +30,7 @@ class LoginFragment : Fragment() {
     private lateinit var binding: FragmentLoginBinding
     private lateinit var viewModel: LoginViewModel
     private lateinit var subscriptionEmail: Pair<Disposable,Disposable>
+    private lateinit var disposes: CompositeDisposable
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -48,22 +50,24 @@ class LoginFragment : Fragment() {
         binding = FragmentLoginBinding.inflate(inflater,container,false)
         viewModel = ViewModelProvider(requireActivity()).get(LoginViewModel::class.java)
 
-
+        disposes = CompositeDisposable()
         //editTextLoginEmail
-        subscriptionEmail = binding.textInputLoginEmail.textInputBehavior(
+        binding.textInputLoginEmail.textInputBehavior(
             subjectInput = viewModel._loginEmail,
             subjectOutput = viewModel.loginEmail)
+            .addToClearList(disposes)
 
         //editTextLoginPassword
         binding.textInputLoginPassword.textInputBehavior(
             subjectInput = viewModel._loginPassword,
             subjectOutput = viewModel.loginPassword)
+            .addToClearList(disposes)
 
         //buttonLogIn
-        viewModel.loginButtonEnabled.subscribe({
+        disposes.add(viewModel.loginButtonEnabled.subscribe({
             binding.bnLogIn.alpha = if (it) 1f else 0.7f
             binding.bnLogIn.isEnabled = it
-        },{})
+        },{}))
 
         binding.bnLogIn.setOnClickListener {
             viewModel.logIn.onNext(Unit)
@@ -77,13 +81,13 @@ class LoginFragment : Fragment() {
             val signInClient = GoogleSignIn.getClient(requireContext(),options)
             resultLauncher.launch(Intent(signInClient.signInIntent))
         }
-        viewModel.isProgressBarShown.subscribe({
-            binding.loginProgressBar.isVisible = it
-        },{})
+        disposes.add(viewModel.isProgressBarShown.subscribe({
+            binding.loginProgressBar.alpha = if (it) 1f else 0f
+        },{}))
 
-        viewModel.snackBarMessage.subscribe({
+       disposes.add(viewModel.snackBarMessage.subscribe({
             snackbar(it)
-        },{})
+        },{}))
 
         return binding.root
     }
@@ -103,11 +107,18 @@ class LoginFragment : Fragment() {
             }
         })
 
+    override fun onPause() {
+        super.onPause()
+        disposes.clear()
+    }
+
     override fun onStop() {
         super.onStop()
-        subscriptionEmail.first.dispose()
-        subscriptionEmail.second.dispose()
 
+    }
+
+    fun Triple<Disposable,Disposable,Disposable>.addToClearList(clearList: CompositeDisposable) {
+        clearList.addAll(this.first,this.second,this.third)
     }
 }
 

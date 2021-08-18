@@ -1,6 +1,8 @@
 package com.example.sportapp.ui.auth.viewModels
 
 import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
@@ -10,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.example.sportapp.R
 import com.example.sportapp.other.Resource
+import com.example.sportapp.other.observe
 import com.example.sportapp.other.validateEmail
 import com.example.sportapp.other.validatePassword
 import com.example.sportapp.repositories.AuthRepository
@@ -18,6 +21,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
 import io.reactivex.rxjava3.core.Single
@@ -87,14 +91,19 @@ class LoginViewModel @ViewModelInject constructor(
             loginButtonEnabled.onNext(it)
         },{},{})
 
+//        loginStatus.subscribe({
+//            Log.d("TAG","progressBar")
+//            Log.d("TAG",it.toString())
+//            when (it) {
+//                is Resource.Success -> {isProgressBarShown.onNext(false)}
+//                is Resource.Error -> {isProgressBarShown.onNext(false)}
+//                is Resource.Loading -> {isProgressBarShown.onNext(true)}
+//            }
+//        },{})
+
         loginStatus.subscribe({
-            when (it) {
-                is Resource.Success -> {isProgressBarShown.onNext(false)}
-                is Resource.Error -> {isProgressBarShown.onNext(false)}
-                is Resource.Loading -> {isProgressBarShown.onNext(true)}
-            }
-        },{})
-        loginStatus.subscribe({
+            Log.d("TAG","snackbar")
+            Log.d("TAG",it.toString())
             when (it) {
                 is Resource.Success -> {snackBarMessage.onNext(applicationContext.getString(R.string.successfully_log))}
                 is Resource.Error -> {snackBarMessage.onNext(it.message ?: "")}
@@ -104,11 +113,13 @@ class LoginViewModel @ViewModelInject constructor(
         logIn.withLatestFrom(validatedEmailPair,validatedPasswordPair, { _,emailPair,passwordPair ->
             Pair(emailPair.first,passwordPair.first)
         })
-            .distinctUntilChanged()
             .observeOn(Schedulers.io())
-            .flatMap {
-                repository.loginRx(it.first, it.second).toObservable()
+            .progressBarBehavior(isProgressBarShown)
+            .concatMapSingle {
+                Log.d("TAG","click")
+                repository.loginRx(it.first,it.second)
             }
+            .progressBarBehavior(isProgressBarShown)
             .map {
                 Resource.Success(it)
             }
@@ -131,5 +142,15 @@ class LoginViewModel @ViewModelInject constructor(
             },{
                 loginStatus.onNext(Resource.Error("Log in failed"))
             })
+    }
+
+    fun <T> Observable<T>.progressBarBehavior(progressBar: BehaviorSubject<Boolean>): Observable<T> {
+        return this.doOnNext {
+            progressBar.onNext(true)
+        }.doOnError{
+           progressBar.onNext(false)
+        }.doOnComplete {
+            progressBar.onNext(false)
+        }
     }
 }
