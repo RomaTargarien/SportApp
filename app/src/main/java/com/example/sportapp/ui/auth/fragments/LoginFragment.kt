@@ -29,8 +29,9 @@ class LoginFragment : Fragment() {
 
     private lateinit var binding: FragmentLoginBinding
     private lateinit var viewModel: LoginViewModel
-    private lateinit var subscriptionEmail: Pair<Disposable,Disposable>
     private lateinit var disposes: CompositeDisposable
+    private lateinit var emialDispose: CompositeDisposable
+    private lateinit var passwordDispose: CompositeDisposable
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -49,25 +50,7 @@ class LoginFragment : Fragment() {
     ): View {
         binding = FragmentLoginBinding.inflate(inflater,container,false)
         viewModel = ViewModelProvider(requireActivity()).get(LoginViewModel::class.java)
-
         disposes = CompositeDisposable()
-        //editTextLoginEmail
-        binding.textInputLoginEmail.textInputBehavior(
-            subjectInput = viewModel._loginEmail,
-            subjectOutput = viewModel.loginEmail)
-            .addToClearList(disposes)
-
-        //editTextLoginPassword
-        binding.textInputLoginPassword.textInputBehavior(
-            subjectInput = viewModel._loginPassword,
-            subjectOutput = viewModel.loginPassword)
-            .addToClearList(disposes)
-
-        //buttonLogIn
-        disposes.add(viewModel.loginButtonEnabled.subscribe({
-            binding.bnLogIn.alpha = if (it) 1f else 0.7f
-            binding.bnLogIn.isEnabled = it
-        },{}))
 
         binding.bnLogIn.setOnClickListener {
             viewModel.logIn.onNext(Unit)
@@ -81,15 +64,35 @@ class LoginFragment : Fragment() {
             val signInClient = GoogleSignIn.getClient(requireContext(),options)
             resultLauncher.launch(Intent(signInClient.signInIntent))
         }
+
+        return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        emialDispose = binding.textInputLoginEmail.textInputBehavior(
+            subjectInput = viewModel._loginEmail,
+            subjectOutput = viewModel.loginEmail)
+
+        //editTextLoginPassword
+        passwordDispose = binding.textInputLoginPassword.textInputBehavior(
+            subjectInput = viewModel._loginPassword,
+            subjectOutput = viewModel.loginPassword)
+
+        //buttonLogIn
+        disposes.add(viewModel.loginButtonEnabled.subscribe({
+            binding.bnLogIn.alpha = if (it) 1f else 0.7f
+            binding.bnLogIn.isEnabled = it
+        },{}))
+
         disposes.add(viewModel.isProgressBarShown.subscribe({
             binding.loginProgressBar.alpha = if (it) 1f else 0f
         },{}))
 
-       disposes.add(viewModel.snackBarMessage.subscribe({
+        disposes.add(viewModel.snackBarMessage.subscribe({
             snackbar(it)
         },{}))
-
-        return binding.root
     }
 
     val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
@@ -109,16 +112,10 @@ class LoginFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
+        emialDispose.clear()
+        passwordDispose.clear()
         disposes.clear()
-    }
 
-    override fun onStop() {
-        super.onStop()
-
-    }
-
-    fun Triple<Disposable,Disposable,Disposable>.addToClearList(clearList: CompositeDisposable) {
-        clearList.addAll(this.first,this.second,this.third)
     }
 }
 

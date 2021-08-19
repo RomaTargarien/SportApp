@@ -25,6 +25,7 @@ import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.core.SingleSource
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
@@ -33,6 +34,11 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
+
+
 
 class LoginViewModel @ViewModelInject constructor(
     private val repository: AuthRepository,
@@ -91,19 +97,7 @@ class LoginViewModel @ViewModelInject constructor(
             loginButtonEnabled.onNext(it)
         },{},{})
 
-//        loginStatus.subscribe({
-//            Log.d("TAG","progressBar")
-//            Log.d("TAG",it.toString())
-//            when (it) {
-//                is Resource.Success -> {isProgressBarShown.onNext(false)}
-//                is Resource.Error -> {isProgressBarShown.onNext(false)}
-//                is Resource.Loading -> {isProgressBarShown.onNext(true)}
-//            }
-//        },{})
-
         loginStatus.subscribe({
-            Log.d("TAG","snackbar")
-            Log.d("TAG",it.toString())
             when (it) {
                 is Resource.Success -> {snackBarMessage.onNext(applicationContext.getString(R.string.successfully_log))}
                 is Resource.Error -> {snackBarMessage.onNext(it.message ?: "")}
@@ -115,11 +109,10 @@ class LoginViewModel @ViewModelInject constructor(
         })
             .observeOn(Schedulers.io())
             .progressBarBehavior(isProgressBarShown)
-            .concatMapSingle {
-                Log.d("TAG","click")
+            .switchMapSingle {
+                Log.d("TAG",Thread.currentThread().toString())
                 repository.loginRx(it.first,it.second)
             }
-            .progressBarBehavior(isProgressBarShown)
             .map {
                 Resource.Success(it)
             }
@@ -144,12 +137,12 @@ class LoginViewModel @ViewModelInject constructor(
             })
     }
 
-    fun <T> Observable<T>.progressBarBehavior(progressBar: BehaviorSubject<Boolean>): Observable<T> {
+    fun <T> Observable<T>.progressBarBehavior(
+        progressBar: BehaviorSubject<Boolean>
+    ): Observable<T> {
         return this.doOnNext {
             progressBar.onNext(true)
-        }.doOnError{
-           progressBar.onNext(false)
-        }.doOnComplete {
+        }.doAfterNext {
             progressBar.onNext(false)
         }
     }

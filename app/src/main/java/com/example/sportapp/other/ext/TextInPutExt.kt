@@ -49,20 +49,21 @@ fun TextInputLayout.enableError(result: Resource<String>) {
 fun TextInputLayout.textInputBehavior(
     subjectInput: BehaviorSubject<String>,
     subjectOutput: BehaviorSubject<Resource<String>>
-): Triple<Disposable,Disposable,Disposable> {
-    val subsription1 = this.observe().distinctUntilChanged()
+): CompositeDisposable {
+    val dispose = CompositeDisposable()
+    dispose.add(this.observe().distinctUntilChanged()
         .subscribe({
                    subjectInput.onNext(it)
-        },{})
+        },{}))
 
-    val subsription2 = subjectOutput.subscribe({
+    dispose.add(subjectOutput.subscribe({
         this.enableError(it)
-    },{})
+    },{}))
 
-    val subsription3 = subjectInput.subscribe( {
+    dispose.add(subjectInput.subscribe( {
         this.editText?.setText(it)
         this.editText?.setSelection(it.length)
-    },{},{})
+    },{},{}))
 
-    return Triple(subsription1,subsription2,subsription3)
+    return dispose
 }
