@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.example.sportapp.R
 import com.example.sportapp.other.Resource
+import com.example.sportapp.other.ext.progressScreenBehavior
 import com.example.sportapp.other.observe
 import com.example.sportapp.other.validateEmail
 import com.example.sportapp.other.validatePassword
@@ -45,16 +46,12 @@ class LoginViewModel @ViewModelInject constructor(
     private val applicationContext: Context
 ): ViewModel() {
 
-    val loginStatus = BehaviorSubject.create<Resource<AuthResult>>()
+    val loginStatus = PublishSubject.create<Resource<AuthResult>>()
 
     val _loginPassword = BehaviorSubject.create<String>()
     val loginPassword = BehaviorSubject.create<Resource<String>>()
 
     val loginButtonEnabled = BehaviorSubject.createDefault(false)
-
-    val isProgressBarShown = BehaviorSubject.create<Boolean>()
-
-    val snackBarMessage = PublishSubject.create<String>()
 
     val _loginEmail = BehaviorSubject.create<String>()
     val loginEmail = BehaviorSubject.create<Resource<String>>()
@@ -63,6 +60,9 @@ class LoginViewModel @ViewModelInject constructor(
 
     val goToRegisterScreen = PublishSubject.create<Unit>()
     val goToForgotPasswordScreen = PublishSubject.create<Unit>()
+
+    val lottieResult = BehaviorSubject.create<Unit>()
+    val loginScreenBehavior = BehaviorSubject.create<Resource<String>>()
 
     init {
        val validatedEmailPair = _loginEmail
@@ -97,31 +97,30 @@ class LoginViewModel @ViewModelInject constructor(
             loginButtonEnabled.onNext(it)
         },{},{})
 
-        loginStatus.subscribe({
-            when (it) {
-                is Resource.Success -> {snackBarMessage.onNext(applicationContext.getString(R.string.successfully_log))}
-                is Resource.Error -> {snackBarMessage.onNext(it.message ?: "")}
-            }
-        },{})
-
         logIn.withLatestFrom(validatedEmailPair,validatedPasswordPair, { _,emailPair,passwordPair ->
             Pair(emailPair.first,passwordPair.first)
         })
+            .doOnNext { loginScreenBehavior.onNext(Resource.Loading()) }
             .observeOn(Schedulers.io())
-            .progressBarBehavior(isProgressBarShown)
             .switchMapSingle {
-                Log.d("TAG",Thread.currentThread().toString())
                 repository.loginRx(it.first,it.second)
             }
             .map {
                 Resource.Success(it)
             }
             .doOnError {
+                lottieResult.onNext(Unit)
+                loginScreenBehavior.onNext(Resource.Error(it.localizedMessage ?: ""))
                 loginStatus.onNext(Resource.Error(it.localizedMessage ?: ""))
             }
             .retry()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(loginStatus)
+
+        lottieResult
+            .delay(3000,TimeUnit.MILLISECONDS)
+            .doOnNext { loginScreenBehavior.onNext(Resource.Success("")) }
+            .subscribe()
     }
 
 
@@ -135,15 +134,5 @@ class LoginViewModel @ViewModelInject constructor(
             },{
                 loginStatus.onNext(Resource.Error("Log in failed"))
             })
-    }
-
-    fun <T> Observable<T>.progressBarBehavior(
-        progressBar: BehaviorSubject<Boolean>
-    ): Observable<T> {
-        return this.doOnNext {
-            progressBar.onNext(true)
-        }.doAfterNext {
-            progressBar.onNext(false)
-        }
     }
 }
