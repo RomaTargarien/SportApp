@@ -49,12 +49,10 @@ class AuthActivity : AppCompatActivity() {
         },{})
 
         viewModelLogin.goToForgotPasswordScreen.subscribe({
-            Log.d("TAG","click")
             router.goToForgotPasswordScreen()
         },{})
         viewModelLogin.goToRegisterScreen.subscribe({
-            Log.d("TAG","click2")
-           router.goToRegisterScreen()
+            router.goToRegisterScreen()
         },{})
     }
 }

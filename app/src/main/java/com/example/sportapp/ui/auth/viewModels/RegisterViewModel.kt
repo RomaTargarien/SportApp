@@ -40,11 +40,10 @@ class RegisterViewModel @ViewModelInject constructor(
 
     val buttonSignInEnabled = BehaviorSubject.createDefault(false)
 
-    val signIn = BehaviorSubject.create<Unit>()
+    val signIn = PublishSubject.create<Unit>()
 
-    val isProgressBarShown = PublishSubject.create<Boolean>()
-
-    val snackBarMessage = BehaviorSubject.create<String>()
+    val registerScreenBehavior = BehaviorSubject.create<Resource<String>>()
+    val lottieResult = BehaviorSubject.create<Unit>()
 
     init {
         val emailSubject = _registerEmail
@@ -120,34 +119,25 @@ class RegisterViewModel @ViewModelInject constructor(
         signIn.withLatestFrom(emailSubject,usernameSubject,passwordSubject) {_,email,userName,password ->
             Triple(email.first,userName.first,password.first)
         }
-            .distinctUntilChanged()
+            .doOnNext { registerScreenBehavior.onNext(Resource.Loading()) }
             .observeOn(Schedulers.io())
-            .flatMapSingle {
+            .switchMapSingle {
                 repository.registerRx(it.first,it.second,it.third)
         }
             .map {
                 Resource.Success(it)
             }
             .doOnError {
-                registerStatus.onNext(Resource.Error(it.localizedMessage ?: ""))
+                lottieResult.onNext(Unit)
+                registerScreenBehavior.onNext(Resource.Error(it.localizedMessage ?: ""))
             }
             .retry()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(registerStatus)
 
-
-        registerStatus.subscribe({
-            when (it) {
-                is Resource.Success -> {isProgressBarShown.onNext(false)}
-                is Resource.Error -> {isProgressBarShown.onNext(false)}
-                is Resource.Loading -> {isProgressBarShown.onNext(true)}
-            }
-        },{})
-        registerStatus.subscribe({
-            when (it) {
-                is Resource.Success -> {snackBarMessage.onNext(applicationContext.getString(R.string.successfully_log))}
-                is Resource.Error -> {snackBarMessage.onNext(it.message ?: "")}
-            }
-        },{})
+        lottieResult
+            .delay(3000,TimeUnit.MILLISECONDS)
+            .doOnNext { registerScreenBehavior.onNext(Resource.Success("")) }
+            .subscribe()
     }
 }

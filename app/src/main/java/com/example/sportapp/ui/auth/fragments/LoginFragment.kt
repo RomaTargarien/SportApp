@@ -98,24 +98,7 @@ class LoginFragment : Fragment() {
 
         //progressScreen
         disposes.add(viewModel.loginScreenBehavior.observeOn(AndroidSchedulers.mainThread()).subscribe({
-            if (it is Resource.Error) {
-                progressScreenViewsVisibility(cardViewVisibility = true,progressBarVisibility = false,errorTextVisibility = true)
-                binding.cardError.startAnimation(animation)
-                binding.lottieResultLogIn.frame = 0
-                binding.lottieResultLogIn.playAnimation()
-                binding.lottieResultLogIn.isVisible = true
-                binding.errorText.text = it.message
-            }
-            if (it is Resource.Loading) {
-                progressScreenViewsVisibility(progressBarVisibility = true, cardViewVisibility = false,
-                    errorTextVisibility = false, lottieResultVisibility = false )
-                binding.progressScreen.isVisible = true
-                binding.loginScreenLayout.forEachChildView { it.isEnabled = false }
-            }
-            if (it is Resource.Success) {
-                binding.progressScreen.isVisible = false
-                binding.loginScreenLayout.forEachChildView { it.isEnabled = true }
-            }
+            this.progressScreen(binding.progresScreen,it,animation,binding.loginScreenLayout)
         },{}))
     }
 
@@ -139,18 +122,6 @@ class LoginFragment : Fragment() {
         emialDispose.clear()
         passwordDispose.clear()
         disposes.clear()
-    }
-
-    fun progressScreenViewsVisibility(
-        cardViewVisibility: Boolean,
-        errorTextVisibility: Boolean,
-        lottieResultVisibility: Boolean = true,
-        progressBarVisibility: Boolean
-    ) {
-        binding.progressBar.isVisible = progressBarVisibility
-        binding.lottieResultLogIn.isVisible = lottieResultVisibility
-        binding.errorText.isVisible = errorTextVisibility
-        binding.cardError.isVisible = cardViewVisibility
     }
 }
 

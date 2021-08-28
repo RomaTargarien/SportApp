@@ -8,6 +8,7 @@
     tools:context=".ui.auth.fragments.RegisterFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/registerScreen"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -172,5 +173,11 @@
             app:layout_constraintTop_toBottomOf="@+id/textInputRegisterRepeatPassword" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/progresScreen"
+        layout="@layout/progress_screen">
+
+    </include>
 
 </FrameLayout>

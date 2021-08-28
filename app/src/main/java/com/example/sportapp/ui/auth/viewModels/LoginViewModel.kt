@@ -1,42 +1,22 @@
 package com.example.sportapp.ui.auth.viewModels
 
 import android.content.Context
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.navigation.fragment.findNavController
-import com.example.sportapp.R
 import com.example.sportapp.other.Resource
-import com.example.sportapp.other.ext.progressScreenBehavior
-import com.example.sportapp.other.observe
 import com.example.sportapp.other.validateEmail
 import com.example.sportapp.other.validatePassword
 import com.example.sportapp.repositories.AuthRepository
-import com.example.sportapp.ui.auth.fragments.LoginFragment
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.ObservableEmitter
-import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.core.SingleSource
-import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
+
 
 
 
@@ -111,7 +91,6 @@ class LoginViewModel @ViewModelInject constructor(
             .doOnError {
                 lottieResult.onNext(Unit)
                 loginScreenBehavior.onNext(Resource.Error(it.localizedMessage ?: ""))
-                loginStatus.onNext(Resource.Error(it.localizedMessage ?: ""))
             }
             .retry()
             .observeOn(AndroidSchedulers.mainThread())

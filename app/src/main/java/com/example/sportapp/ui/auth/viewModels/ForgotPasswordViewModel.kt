@@ -23,8 +23,6 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
     private val applicationContext: Context,
 ): ViewModel() {
 
-    val passwordResetStatus = BehaviorSubject.create<Resource<String>>()
-
     val _emailReset = BehaviorSubject.create<String>()
     val emailReset = BehaviorSubject.create<Resource<String>>()
 
@@ -32,7 +30,8 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
 
     val buttonResetPassword = PublishSubject.create<Unit>()
 
-    val snackBarMessage = BehaviorSubject.create<String>()
+    val lottieResult = BehaviorSubject.create<Unit>()
+    val forgotPasswordScreenBehavior = BehaviorSubject.create<Resource<String>>()
 
     init {
         val emailResetSubject = _emailReset
@@ -49,31 +48,31 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
         },{})
 
         emailResetSubject.subscribe {
-            Log.d("TAG",it.first)
             resetPasswordButtonEnabled.onNext(it.second is Resource.Success)
         }
 
         buttonResetPassword
             .withLatestFrom(emailResetSubject) {_,email -> email.first}
+            .doOnNext { forgotPasswordScreenBehavior.onNext(Resource.Loading()) }
             .observeOn(Schedulers.io())
-            .flatMapSingle {
+            .switchMapSingle {
                 repository.restPasswordRx(it)
             }
-            .map {
-                Resource.Success(applicationContext.getString(R.string.go_to_email))
+            .doOnNext {
+                lottieResult.onNext(Unit)
+                forgotPasswordScreenBehavior.onNext(Resource.EmailSuccess(applicationContext.getString(R.string.go_to_email)))
             }
             .doOnError {
-                passwordResetStatus.onNext(Resource.Error(it.localizedMessage ?: ""))
+                lottieResult.onNext(Unit)
+                forgotPasswordScreenBehavior.onNext(Resource.Error(it.localizedMessage ?: ""))
             }
             .retry()
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(passwordResetStatus)
+            .subscribe()
 
-        passwordResetStatus.subscribe({
-            when (it) {
-                is Resource.Success -> {snackBarMessage.onNext(it.data)}
-                is Resource.Error -> {snackBarMessage.onNext(it.message)}
-            }
-        },{})
+        lottieResult
+            .delay(3000,TimeUnit.MILLISECONDS)
+            .doOnNext { forgotPasswordScreenBehavior.onNext(Resource.Success("")) }
+            .subscribe()
     }
 }
