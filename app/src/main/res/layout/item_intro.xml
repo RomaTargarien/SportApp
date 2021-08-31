@@ -22,6 +22,7 @@
     <TextView
         android:id="@+id/tvTittleIntro"
         style="@style/TittleTextViewStyle"
+        android:gravity="center_horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -36,6 +37,7 @@
         android:id="@+id/tvSubTittleIntro"
         style="@style/SubTittleTextViewStyle"
         android:layout_width="wrap_content"
+        android:gravity="center_horizontal"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

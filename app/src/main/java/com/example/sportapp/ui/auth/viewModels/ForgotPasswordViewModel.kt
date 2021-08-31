@@ -1,18 +1,14 @@
 package com.example.sportapp.ui.auth.viewModels
 
 import android.content.Context
-import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.sportapp.R
+import com.example.sportapp.other.LoadingScreenState
 import com.example.sportapp.other.Resource
 import com.example.sportapp.other.validateEmail
-import com.example.sportapp.repositories.AuthRepository
+import com.example.sportapp.repositories.auth.AuthRepository
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -31,7 +27,7 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
     val buttonResetPassword = PublishSubject.create<Unit>()
 
     val lottieResult = BehaviorSubject.create<Unit>()
-    val forgotPasswordScreenBehavior = BehaviorSubject.create<Resource<String>>()
+    val forgotPasswordScreenBehavior = BehaviorSubject.create<LoadingScreenState>()
 
     init {
         val emailResetSubject = _emailReset
@@ -53,18 +49,18 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
 
         buttonResetPassword
             .withLatestFrom(emailResetSubject) {_,email -> email.first}
-            .doOnNext { forgotPasswordScreenBehavior.onNext(Resource.Loading()) }
+            .doOnNext { forgotPasswordScreenBehavior.onNext(LoadingScreenState.Loading()) }
             .observeOn(Schedulers.io())
             .switchMapSingle {
                 repository.restPasswordRx(it)
             }
             .doOnNext {
                 lottieResult.onNext(Unit)
-                forgotPasswordScreenBehavior.onNext(Resource.EmailSuccess(applicationContext.getString(R.string.go_to_email)))
+                forgotPasswordScreenBehavior.onNext(LoadingScreenState.Success(applicationContext.getString(R.string.go_to_email)))
             }
             .doOnError {
                 lottieResult.onNext(Unit)
-                forgotPasswordScreenBehavior.onNext(Resource.Error(it.localizedMessage ?: ""))
+                forgotPasswordScreenBehavior.onNext(LoadingScreenState.Error(it.localizedMessage ?: ""))
             }
             .retry()
             .observeOn(AndroidSchedulers.mainThread())
@@ -72,7 +68,7 @@ class ForgotPasswordViewModel @ViewModelInject constructor(
 
         lottieResult
             .delay(3000,TimeUnit.MILLISECONDS)
-            .doOnNext { forgotPasswordScreenBehavior.onNext(Resource.Success("")) }
+            .doOnNext { forgotPasswordScreenBehavior.onNext(LoadingScreenState.Invisible()) }
             .subscribe()
     }
 }

@@ -3,10 +3,11 @@ package com.example.sportapp.ui.auth.viewModels
 import android.content.Context
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
+import com.example.sportapp.other.LoadingScreenState
 import com.example.sportapp.other.Resource
 import com.example.sportapp.other.validateEmail
 import com.example.sportapp.other.validatePassword
-import com.example.sportapp.repositories.AuthRepository
+import com.example.sportapp.repositories.auth.AuthRepository
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
@@ -42,7 +43,7 @@ class LoginViewModel @ViewModelInject constructor(
     val goToForgotPasswordScreen = PublishSubject.create<Unit>()
 
     val lottieResult = BehaviorSubject.create<Unit>()
-    val loginScreenBehavior = BehaviorSubject.create<Resource<String>>()
+    val loginScreenBehavior = BehaviorSubject.create<LoadingScreenState>()
 
     init {
        val validatedEmailPair = _loginEmail
@@ -80,7 +81,7 @@ class LoginViewModel @ViewModelInject constructor(
         logIn.withLatestFrom(validatedEmailPair,validatedPasswordPair, { _,emailPair,passwordPair ->
             Pair(emailPair.first,passwordPair.first)
         })
-            .doOnNext { loginScreenBehavior.onNext(Resource.Loading()) }
+            .doOnNext { loginScreenBehavior.onNext(LoadingScreenState.Loading()) }
             .observeOn(Schedulers.io())
             .switchMapSingle {
                 repository.loginRx(it.first,it.second)
@@ -90,7 +91,7 @@ class LoginViewModel @ViewModelInject constructor(
             }
             .doOnError {
                 lottieResult.onNext(Unit)
-                loginScreenBehavior.onNext(Resource.Error(it.localizedMessage ?: ""))
+                loginScreenBehavior.onNext(LoadingScreenState.Error(it.localizedMessage ?: ""))
             }
             .retry()
             .observeOn(AndroidSchedulers.mainThread())
@@ -98,7 +99,7 @@ class LoginViewModel @ViewModelInject constructor(
 
         lottieResult
             .delay(3000,TimeUnit.MILLISECONDS)
-            .doOnNext { loginScreenBehavior.onNext(Resource.Success("")) }
+            .doOnNext { loginScreenBehavior.onNext(LoadingScreenState.Invisible()) }
             .subscribe()
     }
 

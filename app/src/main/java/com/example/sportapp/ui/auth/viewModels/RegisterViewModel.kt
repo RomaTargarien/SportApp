@@ -1,22 +1,17 @@
 package com.example.sportapp.ui.auth.viewModels
 
 import android.content.Context
-import android.util.Log
-import android.util.Patterns
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.sportapp.R
 import com.example.sportapp.other.*
-import com.example.sportapp.repositories.AuthRepository
+import com.example.sportapp.repositories.auth.AuthRepository
 import com.google.firebase.auth.AuthResult
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class RegisterViewModel @ViewModelInject constructor(
@@ -42,7 +37,7 @@ class RegisterViewModel @ViewModelInject constructor(
 
     val signIn = PublishSubject.create<Unit>()
 
-    val registerScreenBehavior = BehaviorSubject.create<Resource<String>>()
+    val registerScreenBehavior = BehaviorSubject.create<LoadingScreenState>()
     val lottieResult = BehaviorSubject.create<Unit>()
 
     init {
@@ -119,7 +114,7 @@ class RegisterViewModel @ViewModelInject constructor(
         signIn.withLatestFrom(emailSubject,usernameSubject,passwordSubject) {_,email,userName,password ->
             Triple(email.first,userName.first,password.first)
         }
-            .doOnNext { registerScreenBehavior.onNext(Resource.Loading()) }
+            .doOnNext { registerScreenBehavior.onNext(LoadingScreenState.Loading()) }
             .observeOn(Schedulers.io())
             .switchMapSingle {
                 repository.registerRx(it.first,it.second,it.third)
@@ -129,7 +124,7 @@ class RegisterViewModel @ViewModelInject constructor(
             }
             .doOnError {
                 lottieResult.onNext(Unit)
-                registerScreenBehavior.onNext(Resource.Error(it.localizedMessage ?: ""))
+                registerScreenBehavior.onNext(LoadingScreenState.Error(it.localizedMessage ?: ""))
             }
             .retry()
             .observeOn(AndroidSchedulers.mainThread())
@@ -137,7 +132,7 @@ class RegisterViewModel @ViewModelInject constructor(
 
         lottieResult
             .delay(3000,TimeUnit.MILLISECONDS)
-            .doOnNext { registerScreenBehavior.onNext(Resource.Success("")) }
+            .doOnNext { registerScreenBehavior.onNext(LoadingScreenState.Invisible()) }
             .subscribe()
     }
 }

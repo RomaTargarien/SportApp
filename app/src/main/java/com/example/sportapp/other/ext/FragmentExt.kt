@@ -17,14 +17,14 @@ import com.google.android.material.snackbar.Snackbar
 
 fun Fragment.progressScreen(
     progressScreenBinding: ProgressScreenBinding,
-    progressScreenBehavior: Resource<String>,
+    progressScreenBehavior: LoadingScreenState,
     animation : Animation,
     layoutToDisable: ConstraintLayout,
     cardViewTopMargin: Int = 260
 ) {
     val params: ViewGroup.MarginLayoutParams = progressScreenBinding.cardError.layoutParams as ViewGroup.MarginLayoutParams
     params.topMargin = cardViewTopMargin.toDp(this.requireContext())
-    if (progressScreenBehavior is Resource.Error) {
+    if (progressScreenBehavior is LoadingScreenState.Error) {
         progressScreenViewsVisibility(cardViewVisibility = true,progressBarVisibility = false
             ,errorTextVisibility = true,progressScreenBinding = progressScreenBinding)
         progressScreenBinding.cardError.startAnimation(animation)
@@ -34,17 +34,17 @@ fun Fragment.progressScreen(
         progressScreenBinding.lottieResultLogIn.isVisible = true
         progressScreenBinding.errorText.text = progressScreenBehavior.message
     }
-    if (progressScreenBehavior is Resource.Loading) {
+    if (progressScreenBehavior is LoadingScreenState.Loading) {
         progressScreenViewsVisibility(progressBarVisibility = true, cardViewVisibility = false,
             errorTextVisibility = false, lottieResultVisibility = false,progressScreenBinding = progressScreenBinding )
         progressScreenBinding.progressScreen.isVisible = true
         layoutToDisable.forEachChildView { it.isEnabled = false }
     }
-    if (progressScreenBehavior is Resource.Success) {
+    if (progressScreenBehavior is LoadingScreenState.Invisible) {
         progressScreenBinding.progressScreen.isVisible = false
         layoutToDisable.forEachChildView { it.isEnabled = true }
     }
-    if (progressScreenBehavior is Resource.EmailSuccess) {
+    if (progressScreenBehavior is LoadingScreenState.Success) {
         progressScreenViewsVisibility(cardViewVisibility = true,progressBarVisibility = false
             ,errorTextVisibility = true,progressScreenBinding = progressScreenBinding)
         progressScreenBinding.cardError.startAnimation(animation)

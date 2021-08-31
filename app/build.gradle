@@ -112,6 +112,40 @@ dependencies {
     def lottieVersion = "3.4.0"
     implementation "com.airbnb.android:lottie:$lottieVersion"
 
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+
+    //Tickaroo
+    implementation 'com.github.Tickaroo.tikxml:annotation:0.8.15'
+    implementation 'com.github.Tickaroo.tikxml:core:0.8.15'
+    kapt 'com.github.Tickaroo.tikxml:processor-common:0.8.15'
+    kapt 'com.github.Tickaroo.tikxml:processor:0.8.15'
+
+    implementation 'com.github.Tickaroo.tikxml:retrofit-converter:0.8.15'
+
+    //Room
+    def room_version = "2.3.0"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    // optional - RxJava2 support for Room
+    implementation "androidx.room:room-rxjava2:$room_version"
+
+    // optional - RxJava3 support for Room
+    implementation "androidx.room:room-rxjava3:$room_version"
+
+    // optional - Guava support for Room, including Optional and ListenableFuture
+    implementation "androidx.room:room-guava:$room_version"
+
+    // optional - Test helpers
+    testImplementation "androidx.room:room-testing:$room_version"
+
+    // optional - Paging 3 Integration
+    implementation "androidx.room:room-paging:2.4.0-alpha04"
+
+
+
+
 
 
 }

@@ -1,4 +1,4 @@
-package com.example.sportapp.repositories
+package com.example.sportapp.repositories.auth
 
 import com.example.sportapp.other.Resource
 import com.google.firebase.auth.AuthCredential

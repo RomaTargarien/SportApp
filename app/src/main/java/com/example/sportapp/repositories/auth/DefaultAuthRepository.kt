@@ -1,19 +1,11 @@
-package com.example.sportapp.repositories
+package com.example.sportapp.repositories.auth
 
-import android.util.Log
 import com.example.sportapp.data.User
-import com.example.sportapp.other.Resource
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import io.reactivex.rxjava3.core.*
-import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.functions.Cancellable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
-import java.lang.Exception
 import java.util.concurrent.Executors
 
 class DefaultAuthRepository : AuthRepository {
@@ -56,10 +48,8 @@ class DefaultAuthRepository : AuthRepository {
             auth.sendPasswordResetEmail(email)
                 .addOnCompleteListener(executor) { task ->
                     if (task.isSuccessful) {
-                        Log.d("TAG","complete")
                         emiter.onSuccess(Unit)
                     } else {
-                        Log.d("TAG","err")
                         emiter.onError(task.exception)
                     }
                 }

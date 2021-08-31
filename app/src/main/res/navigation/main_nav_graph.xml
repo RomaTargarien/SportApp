@@ -11,11 +11,6 @@
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" />
     <fragment
-        android:id="@+id/liveFragment"
-        android:name="com.example.sportapp.ui.main.fragments.LiveFragment"
-        android:label="fragment_live"
-        tools:layout="@layout/fragment_live" />
-    <fragment
         android:id="@+id/searchFragment"
         android:name="com.example.sportapp.ui.main.fragments.SearchFragment"
         android:label="fragment_search"

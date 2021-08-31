@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Html
+import android.util.Log
 import android.widget.TextView
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
@@ -18,6 +19,7 @@ class IntroActivity : AppCompatActivity() {
     private lateinit var binding: ActivityIntroBinding
     val dots = mutableListOf<TextView>()
     private lateinit var router: IIntroRouter
+    private var enterKey = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +28,7 @@ class IntroActivity : AppCompatActivity() {
         router = IntroRouter(this,AuthActivity())
         val introItems = listOf(
             Intro(R.raw.cup,"Welcome to Sporter", "Invastigate new horizons of sport"),
-            Intro(R.raw.tennis,"Everything you need right here", "All sport news in one application, stay in touch and up to date"),
+            Intro(R.raw.tennis,"Everything you need", "Stay in touch and up to date"),
             Intro(R.raw.target,"Welcome to Sporter", "Invastigate new horizons of sport"),
         )
         dotsIndicator(introItems.size-1)
@@ -40,6 +42,7 @@ class IntroActivity : AppCompatActivity() {
                 super.onPageSelected(position)
             }
         })
+
         binding.bnGoToAuth.setOnClickListener {
             router.enterActivity()
         }
