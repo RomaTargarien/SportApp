@@ -1,16 +1,13 @@
 package com.example.sportapp.ui.introduction
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Html
-import android.util.Log
 import android.widget.TextView
-import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
 import com.example.sportapp.R
 import com.example.sportapp.adapters.ViewPagerIntroAdapter
-import com.example.sportapp.data.ui.Intro
+import com.example.sportapp.models.ui.Intro
 import com.example.sportapp.databinding.ActivityIntroBinding
 import com.example.sportapp.ui.auth.AuthActivity
 

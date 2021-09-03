@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.example.sportapp.R
-import com.example.sportapp.data.ui.Intro
+import com.example.sportapp.models.ui.Intro
 
 class ViewPagerIntroAdapter(val items: List<Intro>) : RecyclerView.Adapter<ViewPagerIntroAdapter.ViewPagerViewHolder>(){
 

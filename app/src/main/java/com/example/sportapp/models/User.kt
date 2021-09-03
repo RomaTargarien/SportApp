@@ -1,4 +1,4 @@
-package com.example.sportapp.data
+package com.example.sportapp.models
 
 data class User(
     val uid: String,
