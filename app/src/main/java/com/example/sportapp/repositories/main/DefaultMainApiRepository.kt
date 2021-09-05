@@ -1,6 +1,7 @@
 package com.example.sportapp.repositories.main
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import com.example.sportapp.apis.MaterialsApi
 import com.example.sportapp.db.NewsDao
 import com.example.sportapp.models.rss.materials.Item
@@ -13,10 +14,10 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import java.lang.Exception
 import javax.inject.Inject
 
-class DefaultMainApiRepository @Inject constructor(): MainApiRepository {
+class DefaultMainApiRepository @Inject constructor(
+    private var materialsApi: MaterialsApi
+): MainApiRepository {
 
-    @Inject
-    lateinit var materialsApi: MaterialsApi
 
     @Inject
     lateinit var dao: NewsDao
@@ -48,12 +49,16 @@ class DefaultMainApiRepository @Inject constructor(): MainApiRepository {
         return dao.getAllNews()
     }
 
-    override fun fetchWithOffset(offset: Int,limit: Int): Observable<List<Item>> {
+    override fun fetchWithOffset(offset: Int,limit: Int): List<Item> {
         return dao.getItemsWithOffset(offset,limit)
     }
 
     override fun delete() {
         dao.delete()
+    }
+
+    override fun fetchWithOffsetObservable(offset: Int, limit: Int): Observable<List<Item>> {
+        return dao.getItemsWithOffsetObservable(offset, limit)
     }
 
 

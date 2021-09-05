@@ -31,7 +31,7 @@ object MainModule {
     @Singleton
     @Provides
     fun provideMainApiRepository() =
-        DefaultMainApiRepository() as MainApiRepository
+        DefaultMainApiRepository(provideMaterialsApi()) as MainApiRepository
 
     @Singleton
     @Provides
