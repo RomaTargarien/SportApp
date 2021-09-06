@@ -5,7 +5,7 @@ import androidx.room.Room
 import com.example.sportapp.apis.MaterialsApi
 import com.example.sportapp.db.NewsDatabase
 import com.example.sportapp.other.Constants.BASE_URL
-import com.example.sportapp.repositories.main.DefaultMainApiRepository
+import com.example.sportapp.repositories.main.DefaultMainRepository
 import com.example.sportapp.repositories.main.MainApiRepository
 import com.tickaroo.tikxml.retrofit.TikXmlConverterFactory
 import dagger.Module
@@ -31,7 +31,7 @@ object MainModule {
     @Singleton
     @Provides
     fun provideMainApiRepository() =
-        DefaultMainApiRepository() as MainApiRepository
+        DefaultMainRepository() as MainApiRepository
 
     @Singleton
     @Provides

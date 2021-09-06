@@ -13,7 +13,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import java.lang.Exception
 import javax.inject.Inject
 
-class DefaultMainApiRepository @Inject constructor(): MainApiRepository {
+class DefaultMainRepository @Inject constructor(): MainApiRepository {
 
     @Inject
     lateinit var materialsApi: MaterialsApi
@@ -48,7 +48,7 @@ class DefaultMainApiRepository @Inject constructor(): MainApiRepository {
         return dao.getAllNews()
     }
 
-    override fun fetchWithOffset(offset: Int,limit: Int): Observable<List<Item>> {
+    override fun fetchWithOffset(offset: Int,limit: Int): List<Item> {
         return dao.getItemsWithOffset(offset,limit)
     }
 

@@ -10,6 +10,6 @@ interface MainApiRepository {
     fun getApiMaterials(): Single<Rss>
     fun insertDataInDatabase(items: List<Item>)
     fun fetchDataFromDatabase(): Observable<List<Item>>
-    fun fetchWithOffset(offset: Int,limit: Int = 10): Observable<List<Item>>
     fun delete()
+    fun fetchWithOffset(offset: Int,limit: Int = 10): List<Item>
 }

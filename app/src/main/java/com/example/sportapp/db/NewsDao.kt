@@ -21,5 +21,7 @@ interface NewsDao {
     fun delete()
 
     @Query("SELECT * FROM items ORDER BY published DESC LIMIT :limit OFFSET :offset")
-    fun getItemsWithOffset(offset: Int,limit: Int = 10): Observable<List<Item>>
+    fun getItemsWithOffset(offset: Int,limit: Int = 10): List<Item>
+
+
 }

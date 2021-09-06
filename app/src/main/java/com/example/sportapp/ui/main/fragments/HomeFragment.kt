@@ -44,6 +44,13 @@ class HomeFragment : Fragment() {
             viewModel.refresh.onNext(Unit)
             binding.itemsToRefresh.isRefreshing = false
         }
+
+        viewModel.smoothScrollToFirstPosition
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                binding.rvNews.smoothScrollToPosition(0)
+            },{})
+
         viewModel.getData.onNext(Unit)
         viewModel.materials.observeOn(AndroidSchedulers.mainThread()).subscribe({
            materialsAdapter.differ.submitList(it)

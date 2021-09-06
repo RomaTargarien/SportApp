@@ -64,4 +64,5 @@ class MaterialsAdapter() : RecyclerView.Adapter<MaterialsAdapter.MaterialsViewHo
     }
 
     val differ = AsyncListDiffer(this, differCallback)
+
 }
