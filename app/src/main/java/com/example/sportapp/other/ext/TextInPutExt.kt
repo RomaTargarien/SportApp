@@ -2,12 +2,11 @@ package com.example.sportapp.other
 
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
+import com.example.sportapp.other.states.Resource
 import com.google.android.material.textfield.TextInputLayout
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 fun TextInputLayout.observe(): Observable<String> {

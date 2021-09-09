@@ -1,7 +1,6 @@
 package com.example.sportapp.ui.auth.fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +10,6 @@ import android.view.animation.AnimationUtils
 import androidx.lifecycle.ViewModelProvider
 import com.example.sportapp.R
 import com.example.sportapp.databinding.FragmentForgotPasswordBinding
-import com.example.sportapp.other.Resource
 import com.example.sportapp.other.progressScreen
 import com.example.sportapp.other.textInputBehavior
 import com.example.sportapp.ui.auth.viewModels.ForgotPasswordViewModel

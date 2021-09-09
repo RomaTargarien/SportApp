@@ -1,6 +1,5 @@
 package com.example.sportapp.db
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -22,8 +21,7 @@ interface NewsDao {
     fun delete()
 
     @Query("SELECT * FROM items ORDER BY published DESC LIMIT :limit OFFSET :offset")
-    fun getItemsWithOffsetObservable(offset: Int,limit: Int = 10): Observable<List<Item>>
-
-    @Query("SELECT * FROM items ORDER BY published DESC LIMIT :limit OFFSET :offset")
     fun getItemsWithOffset(offset: Int,limit: Int = 10): List<Item>
+
+
 }

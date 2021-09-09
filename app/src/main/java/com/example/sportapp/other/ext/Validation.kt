@@ -7,8 +7,7 @@ import com.example.sportapp.R
 import com.example.sportapp.other.Constants.MAX_USERNAME_LENGHT
 import com.example.sportapp.other.Constants.MIN_PASSWORD_LENGHT
 import com.example.sportapp.other.Constants.MIN_USERNAME_LENGHT
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
+import com.example.sportapp.other.states.Resource
 
 fun String.validateEmail(context: Context): Resource<String> {
     if (this.isEmpty()) {

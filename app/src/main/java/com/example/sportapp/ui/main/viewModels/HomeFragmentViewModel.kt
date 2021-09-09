@@ -3,113 +3,111 @@ package com.example.sportapp.ui.main.viewModels
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.sportapp.db.NewsDao
 import com.example.sportapp.models.rss.materials.Item
-import com.example.sportapp.repositories.main.DefaultMainApiRepository
+import com.example.sportapp.other.Constants.LIMIT
+import com.example.sportapp.other.Constants.OFFSET
+import com.example.sportapp.other.states.DbState
+import com.example.sportapp.other.states.ListState
+import com.example.sportapp.repositories.main.DefaultMainRepository
 import com.example.sportapp.repositories.main.MainApiRepository
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 
 
 class HomeFragmentViewModel @ViewModelInject constructor(
-   private var mainApiRepository: MainApiRepository,
-   private var dao: NewsDao
+   private var mainApiRepository: MainApiRepository
 ): ViewModel() {
 
-    val refresh = PublishSubject.create<Unit>()
+    val refresh = PublishSubject.create<DbState>()
     val materials = BehaviorSubject.create<MutableList<Item>>()
-    val getData = PublishSubject.create<Unit>()
-    var offset = 0
-    var newComingListSize = 0
-    var isEmpty = false
+    val changeTheOffset = PublishSubject.create<Unit>()
+    val smoothScrollToFirstPosition = PublishSubject.create<Unit>()
+    val getDataWithOffset = BehaviorSubject.create<ListState>()
+    val isLastItems = BehaviorSubject.createDefault(false)
 
     init {
 
-        refresh.observeOn(Schedulers.io())
-            .switchMapSingle {
-            mainApiRepository.getApiMaterials()
-        }
-            .map {
-                it.channel.items
+        refresh
+            .observeOn(Schedulers.io())
+            .switchMapSingle { dbState ->
+                mainApiRepository.getApiMaterials().map {
+                    Pair(dbState,it.channel.items)
+                }
             }
-            .map { newItems ->
-                if (!isEmpty) {
-                    val lastItem = dao.getItemsWithOffset(0,1).get(0)
-                    itemsToInsert(newItems,lastItem)
+            .map { pair ->
+                if (!(pair.first is DbState.Empty)) {
+                    val lastItems = mainApiRepository.fetchWithOffset(0)
+                    itemsToInsert(pair.second,lastItems)
                 } else {
-                    newItems
+                    pair.second
                 }
             }
             .doOnNext {
-                newComingListSize = it.size
-                Log.d("TAG","newComingListSize $newComingListSize")
+               mainApiRepository.insertDataInDatabase(it)
             }
             .doOnNext {
-                dao.putNewItems(it)
-                isEmpty = false
+                if (!it.isEmpty()) {
+                    getDataWithOffset.onNext(ListState.Reload())
+                }
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe()
 
-
-        dao.getItemsWithOffsetObservable(0,newComingListSize)
-            .doOnNext {
-                Log.d("TAG","newComingListSize2 $newComingListSize")
-            }
-            .subscribeOn(Schedulers.io())
-            .map { items ->
-                Log.d("TAG","newComingListSize3 $newComingListSize")
-                Log.d("TAG","itemsToAddOnTheTop - ${items.toString()}")
-                val list = mutableListOf<Item>()
-                list.addAll(items)
-                if (materials.hasValue()) {
-                    list.addAll(materials.value)
-                }
-                list
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                //materials.onNext(it)
-            },{})
-
-        getData.observeOn(Schedulers.io())
+        getDataWithOffset.observeOn(Schedulers.io())
             .map {
-                dao.getItemsWithOffset(offset)
-                //mainApiRepository.fetchWithOffset(offset)
-            }
-            .map { items ->
-                val list = mutableListOf<Item>()
-                if (materials.hasValue()) {
-                    list.addAll(materials.value)
+                when (it) {
+                    is ListState.Fulled -> {
+                        val list = mutableListOf<Item>()
+                        if (materials.hasValue()) {
+                            list.addAll(materials.value)
+                        }
+                        val items = mainApiRepository.fetchWithOffset(it.offset)
+                        if (items.isEmpty() && it.offset == 0) {
+                            refresh.onNext(DbState.Empty())
+                        } else if (items.isEmpty()) {
+                            isLastItems.onNext(true)
+                        }
+                        else {
+                            list.addAll(items)
+                        }
+                        Pair(list,it)
+                    }
+                    is ListState.Reload -> {
+                        changeTheOffset.onNext(Unit)
+                        isLastItems.onNext(false)
+                        val list = mainApiRepository.fetchWithOffset(0)
+                        Pair(list,it)
+                    }
                 }
-                list.addAll(items)
-                list
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                offset += 10
-                Log.d("TAG",offset.toString())
-                Log.d("TAG",it.toString())
-                materials.onNext(it)
+                for (item in it.first) {
+                    Log.d("TAG",item.title)
+                }
+                Log.d("TAG","--------------------------------------")
+                materials.onNext(it.first.toMutableList())
+                if (it.second is ListState.Reload) {
+                    smoothScrollToFirstPosition.onNext(Unit)
+                }
             },{})
     }
 
-    private fun itemsToInsert(newItems: List<Item>,lastItem: Item): List<Item> {
+    private fun itemsToInsert(newItems: List<Item>,lastItems: List<Item>): List<Item> {
         val itemsToInsert = mutableListOf<Item>()
         for (item in newItems) {
-            if (!(lastItem.equals(item))) {
+            if (!(item in lastItems)) {
                 itemsToInsert.add(item)
             } else {
                 break
             }
         }
-        Log.d("TAG","Inserted items $itemsToInsert")
         return itemsToInsert
     }
 }
+
+

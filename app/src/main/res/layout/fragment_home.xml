@@ -8,13 +8,14 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:background="#151515"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/itemsToRefresh"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -23,10 +24,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvNews"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintVertical_bias="0.024"
-                tools:layout_editor_absoluteX="-16dp"/>
+                android:layout_height="match_parent"/>
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

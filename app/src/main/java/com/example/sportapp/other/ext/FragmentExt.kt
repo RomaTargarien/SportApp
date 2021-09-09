@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import com.example.sportapp.R
 import com.example.sportapp.databinding.ProgressScreenBinding
 import com.example.sportapp.other.ext.forEachChildView
+import com.example.sportapp.other.states.LoadingScreenState
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_LONG
 import com.google.android.material.snackbar.Snackbar
 
