@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
-import com.bumptech.glide.Glide
 import com.example.sportapp.R
 import com.example.sportapp.databinding.ItemMaterialBinding
 import com.example.sportapp.databinding.ItemMaterialHeaderBinding

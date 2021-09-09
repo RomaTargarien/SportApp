@@ -15,10 +15,10 @@
             app:destination="@id/itemFragment" />
     </fragment>
     <fragment
-        android:id="@+id/searchFragment"
-        android:name="com.example.sportapp.ui.main.fragments.SearchFragment"
+        android:id="@+id/categoriesFragment"
+        android:name="com.example.sportapp.ui.main.fragments.CategoriesFragment"
         android:label="fragment_search"
-        tools:layout="@layout/fragment_search" />
+        tools:layout="@layout/fragment_categories" />
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.sportapp.ui.main.fragments.SettingsFragment"
