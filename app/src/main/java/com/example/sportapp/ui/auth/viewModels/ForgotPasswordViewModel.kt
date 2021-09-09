@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import com.example.sportapp.R
-import com.example.sportapp.other.LoadingScreenState
-import com.example.sportapp.other.Resource
+import com.example.sportapp.other.states.LoadingScreenState
+import com.example.sportapp.other.states.Resource
 import com.example.sportapp.other.validateEmail
 import com.example.sportapp.repositories.auth.AuthRepository
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers

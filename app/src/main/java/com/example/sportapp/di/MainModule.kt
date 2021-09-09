@@ -3,6 +3,7 @@ package com.example.sportapp.di
 import android.content.Context
 import androidx.room.Room
 import com.example.sportapp.apis.MaterialsApi
+import com.example.sportapp.db.NewsDao
 import com.example.sportapp.db.NewsDatabase
 import com.example.sportapp.other.Constants.BASE_URL
 import com.example.sportapp.repositories.main.DefaultMainRepository
@@ -30,8 +31,10 @@ object MainModule {
 
     @Singleton
     @Provides
-    fun provideMainApiRepository() =
-        DefaultMainRepository() as MainApiRepository
+    fun provideMainApiRepository(
+        materialsApi: MaterialsApi,
+        dao: NewsDao
+    ) = DefaultMainRepository(dao,materialsApi) as MainApiRepository
 
     @Singleton
     @Provides

@@ -1,15 +1,10 @@
 package com.example.sportapp.ui.auth
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
 import com.example.sportapp.R
-import com.example.sportapp.databinding.ActivityAuthBinding
-import com.example.sportapp.other.Resource
+import com.example.sportapp.other.states.Resource
 import com.example.sportapp.ui.auth.viewModels.ForgotPasswordViewModel
 import com.example.sportapp.ui.auth.viewModels.LoginViewModel
 import com.example.sportapp.ui.auth.viewModels.RegisterViewModel

@@ -3,14 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="130dp">
+    android:id="@+id/itemMaterialConstraint"
+    android:layout_height="173dp">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="398dp"
-        android:layout_height="116dp"
-        android:elevation="8dp"
-        app:cardCornerRadius="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/cardView"
+        android:layout_width="410dp"
+        android:layout_height="130dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -18,24 +17,43 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#98DFFF">
+            android:background="#F8F6F6">
+
+
 
             <ImageView
                 android:id="@+id/ivMaterial"
-                android:layout_width="199dp"
-                android:layout_height="131dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0" />
 
             <TextView
-                android:id="@+id/tvMaterialTitle"
-                style="@style/TittleTextViewStyle"
-                android:layout_width="179dp"
-                android:layout_height="90dp"
+                android:id="@+id/tvCategoryInCard"
+                style="@style/SubTittleTextViewStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginTop="4dp"
+                android:textColor="@color/grey"
+                android:textDirection="ltr"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@+id/ivMaterial"
+                app:layout_constraintTop_toTopOf="parent">
+
+            </TextView>
+
+            <TextView
+                android:id="@+id/tvMaterialTitle"
+                style="@style/TittleTextViewStyle"
+                android:layout_width="197dp"
+                android:layout_height="79dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="26dp"
+                android:textColor="@color/black"
                 android:textDirection="ltr"
                 android:textSize="12sp"
                 app:layout_constraintStart_toEndOf="@+id/ivMaterial"
@@ -50,19 +68,84 @@
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="2dp"
                 android:textDirection="ltr"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/ivMaterial"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="1.0" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+
     </androidx.cardview.widget.CardView>
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardCategory"
+        android:layout_width="410dp"
+        android:layout_height="40dp"
+        android:visibility="gone"
+        android:layout_marginTop="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#F8F6F6">
 
+            <TextView
+                android:id="@+id/tvCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textColor="@color/black"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"></TextView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
+    </androidx.cardview.widget.CardView>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintTextSeparator"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView">
+
+        <TextView
+            android:id="@+id/textSeparator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textDirection="ltr"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="8dp"
+            app:layout_constraintHorizontal_bias="0.01"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.4"/>
+
+        <View
+            android:layout_width="410dp"
+            android:layout_height="1dp"
+            android:backgroundTint="@color/white"
+            android:background="@drawable/line"
+            android:layout_marginStart="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.036"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textSeparator"
+            app:layout_constraintVertical_bias="0.4"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

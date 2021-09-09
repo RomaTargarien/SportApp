@@ -13,13 +13,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import java.lang.Exception
 import javax.inject.Inject
 
-class DefaultMainRepository @Inject constructor(): MainApiRepository {
+class DefaultMainRepository @Inject constructor(private val dao: NewsDao,private val materialsApi: MaterialsApi): MainApiRepository {
 
-    @Inject
-    lateinit var materialsApi: MaterialsApi
-
-    @Inject
-    lateinit var dao: NewsDao
 
 
     override fun getApiMaterials(): Single<Rss> {

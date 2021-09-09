@@ -14,6 +14,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sportapp.R
@@ -21,6 +22,9 @@ import com.example.sportapp.adapters.MaterialsAdapter
 import com.example.sportapp.databinding.FragmentHomeBinding
 import com.example.sportapp.decorators.SpacesItemVerticalDecoration
 import com.example.sportapp.models.rss.materials.Item
+import com.example.sportapp.other.Constants.OFFSET
+import com.example.sportapp.other.states.DbState
+import com.example.sportapp.other.states.ListState
 import com.example.sportapp.ui.main.viewModels.HomeFragmentViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -32,6 +36,10 @@ class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
     private val viewModel by viewModels<HomeFragmentViewModel>()
     private lateinit var materialsAdapter: MaterialsAdapter
+    private var offset = 0
+    private var isLoading = false
+    private var isLastItems = false
+    private var isScrolling = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,28 +48,56 @@ class HomeFragment : Fragment() {
         binding = FragmentHomeBinding.inflate(layoutInflater,container,false)
         setUpRefreshing()
         setUpRecyclerView()
+
+        materialsAdapter.setOnClickListener {
+            val bundle = Bundle().apply {
+                putSerializable("link",it.link)
+            }
+            Log.d("TAG","pressed")
+            findNavController().navigate(
+                R.id.action_homeFragment_to_itemFragment,
+                bundle
+            )
+        }
+
+        //refreshing
         binding.itemsToRefresh.setOnRefreshListener {
-            viewModel.refresh.onNext(Unit)
+            viewModel.refresh.onNext(DbState.Fulled())
             binding.itemsToRefresh.isRefreshing = false
         }
 
+        //smoothRecyclerToFirstPosition
         viewModel.smoothScrollToFirstPosition
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 binding.rvNews.smoothScrollToPosition(0)
             },{})
 
-        viewModel.getData.onNext(Unit)
+        //Passing event to load data + changing the offset
+        viewModel.getDataWithOffset.onNext(ListState.Fulled(offset)).also {
+            offset += OFFSET
+        }
+
+        //Changing the offset after refreshing
+        viewModel.changeTheOffset.observeOn(AndroidSchedulers.mainThread()).subscribe({
+            offset = OFFSET
+        },{})
+
+        //Check if we habe load all items
+        viewModel.isLastItems.observeOn(AndroidSchedulers.mainThread()).subscribe({
+            isLastItems = it
+        },{})
+
+        //Passing items to the adapter
         viewModel.materials.observeOn(AndroidSchedulers.mainThread()).subscribe({
            materialsAdapter.differ.submitList(it)
+
         },{})
         return binding.root
     }
 
-    private var isLoading = false
-    private var isLastItems = false
-    private var isScrolling = false
 
+    //Pagination
     private val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
@@ -78,7 +114,8 @@ class HomeFragment : Fragment() {
             val shouldPaginate = isNotLoadingAndNotLast && isAtLastItem && isNotAtBeginnig
                     && isTotalMoreThanVisible && isScrolling
             if (shouldPaginate) {
-                viewModel.getData.onNext(Unit)
+                viewModel.getDataWithOffset.onNext(ListState.Fulled(offset))
+                offset += OFFSET
                 isScrolling = false
             } else {
                 binding.rvNews.setPadding(0,0,0,0)
@@ -93,15 +130,19 @@ class HomeFragment : Fragment() {
         }
     }
 
+    //RecyclerView
     private fun setUpRecyclerView() {
         materialsAdapter = MaterialsAdapter()
+
         binding.rvNews.apply {
             adapter = materialsAdapter
             layoutManager = LinearLayoutManager(this.context,LinearLayoutManager.VERTICAL,false)
             addOnScrollListener(this@HomeFragment.scrollListener)
+            addItemDecoration(SpacesItemVerticalDecoration(25))
         }
     }
 
+    //PullToRefresh
     private fun setUpRefreshing() {
         binding.itemsToRefresh.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(this.requireContext(),R.color.design_default_color_primary))
         binding.itemsToRefresh.setColorSchemeColors(Color.WHITE)
