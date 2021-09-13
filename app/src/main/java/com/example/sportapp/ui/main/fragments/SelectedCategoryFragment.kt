@@ -1,6 +1,5 @@
 package com.example.sportapp.ui.main.fragments
 
-import android.content.ClipData
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -10,69 +9,47 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.ChangeBounds
-import androidx.transition.Fade
-import androidx.transition.TransitionManager
-import androidx.transition.TransitionSet
 import com.example.sportapp.R
-import com.example.sportapp.adapters.HomeCategoriesAdapter
 import com.example.sportapp.adapters.MaterialsAdapter
-
+import com.example.sportapp.databinding.FragmentCategoriesBinding
 import com.example.sportapp.databinding.FragmentHomeBinding
+import com.example.sportapp.databinding.FragmentSelectedCategoryBinding
 import com.example.sportapp.decorators.SpacesItemVerticalDecoration
-import com.example.sportapp.models.rss.materials.Item
-import com.example.sportapp.other.Constants.OFFSET
+import com.example.sportapp.other.Constants
+import com.example.sportapp.other.ext.convertToRssQuery
 import com.example.sportapp.other.states.DbState
 import com.example.sportapp.other.states.ListState
 import com.example.sportapp.ui.main.viewModels.HomeFragmentViewModel
 import com.example.sportapp.ui.main.viewModels.SelectedCategoryViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
-class HomeFragment : Fragment() {
+class SelectedCategoryFragment : Fragment() {
 
-    private lateinit var binding: FragmentHomeBinding
-    private val viewModel by viewModels<HomeFragmentViewModel>()
-    private lateinit var materialsAdapter: MaterialsAdapter
-    private lateinit var categoriesHomeAdapter: HomeCategoriesAdapter
-    private var likedCategories = emptyList<String>().toMutableList()
+    val args: SelectedCategoryFragmentArgs by navArgs()
+    private lateinit var binding: FragmentSelectedCategoryBinding
+    private val viewModel by viewModels<SelectedCategoryViewModel>()
+    lateinit var materialsAdapter: MaterialsAdapter
     private var offset = 0
     private var isLoading = false
     private var isLastItems = false
     private var isScrolling = false
-    private var viewVisible = false
+    private var category = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentHomeBinding.inflate(layoutInflater,container,false)
+        binding = FragmentSelectedCategoryBinding.inflate(layoutInflater,container,false)
         setUpRefreshing()
         setUpRecyclerView()
-
-//        val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.UNMETERED)
-//            .build()
-//
-//        val periodicRequest = PeriodicWorkRequest
-//            .Builder(NewsWorker::class.java,15,TimeUnit.MINUTES)
-//            .setConstraints(constraints)
-//            .build()
-//
-//
-//        WorkManager.getInstance().enqueueUniquePeriodicWork(
-//            "NEWS_WORKER",
-//            ExistingPeriodicWorkPolicy.KEEP,
-//            periodicRequest)
+        category = args.category
 
         materialsAdapter.setOnClickListener {
             val bundle = Bundle().apply {
@@ -80,40 +57,14 @@ class HomeFragment : Fragment() {
             }
             Log.d("TAG","pressed")
             findNavController().navigate(
-                R.id.action_homeFragment_to_itemFragment,
+                R.id.action_selectedCategoryFragment_to_itemFragment,
                 bundle
             )
-        }
-
-        categoriesHomeAdapter.setOnItemClickListener {
-            val bundle = Bundle().apply {
-                putString("category",it)
-            }
-            findNavController().navigate(
-                R.id.action_homeFragment_to_selectedCategoryFragment,
-                bundle
-            )
-        }
-
-        categoriesHomeAdapter.setOnDeleteButtonClickListener {
-            likedCategories.remove(it)
-            viewModel.updateLikedCategories.onNext(likedCategories)
-        }
-
-        viewModel.likedCategories.observeOn(AndroidSchedulers.mainThread()).subscribe({
-           likedCategories = it.toMutableList()
-           categoriesHomeAdapter.differ.submitList(it)
-        },{})
-
-        binding.ibLike.setOnClickListener {
-            TransitionManager.beginDelayedTransition(binding.container)
-            viewVisible = !viewVisible
-            binding.rvCategories.isVisible = viewVisible
         }
 
         //refreshing
         binding.itemsToRefresh.setOnRefreshListener {
-            viewModel.refresh.onNext(DbState.Fulled())
+            viewModel.refresh.onNext(DbState.Fulled(category.convertToRssQuery()))
             binding.itemsToRefresh.isRefreshing = false
         }
 
@@ -125,13 +76,13 @@ class HomeFragment : Fragment() {
             },{})
 
         //Passing event to load data + changing the offset
-        viewModel.getDataWithOffset.onNext(ListState.Fulled(offset)).also {
-            offset += OFFSET
+        viewModel.getDataWithOffset.onNext(ListState.Fulled(offset,category)).also {
+            offset += Constants.OFFSET
         }
 
         //Changing the offset after refreshing
         viewModel.changeTheOffset.observeOn(AndroidSchedulers.mainThread()).subscribe({
-            offset = OFFSET
+            offset = Constants.OFFSET
         },{})
 
         //Check if we habe load all items
@@ -141,8 +92,7 @@ class HomeFragment : Fragment() {
 
         //Passing items to the adapter
         viewModel.materials.observeOn(AndroidSchedulers.mainThread()).subscribe({
-           materialsAdapter.differ.submitList(it)
-
+            materialsAdapter.differ.submitList(it)
         },{})
         return binding.root
     }
@@ -165,8 +115,8 @@ class HomeFragment : Fragment() {
             val shouldPaginate = isNotLoadingAndNotLast && isAtLastItem && isNotAtBeginnig
                     && isTotalMoreThanVisible && isScrolling
             if (shouldPaginate) {
-                viewModel.getDataWithOffset.onNext(ListState.Fulled(offset))
-                offset += OFFSET
+                viewModel.getDataWithOffset.onNext(ListState.Fulled(offset,category))
+                offset += Constants.OFFSET
                 isScrolling = false
             } else {
                 binding.rvNews.setPadding(0,0,0,0)
@@ -184,17 +134,12 @@ class HomeFragment : Fragment() {
     //RecyclerView
     private fun setUpRecyclerView() {
         materialsAdapter = MaterialsAdapter()
+
         binding.rvNews.apply {
             adapter = materialsAdapter
             layoutManager = LinearLayoutManager(this.context,LinearLayoutManager.VERTICAL,false)
-            addOnScrollListener(this@HomeFragment.scrollListener)
+            addOnScrollListener(this@SelectedCategoryFragment.scrollListener)
             addItemDecoration(SpacesItemVerticalDecoration(25))
-        }
-
-        categoriesHomeAdapter = HomeCategoriesAdapter()
-        binding.rvCategories.apply {
-            adapter = categoriesHomeAdapter
-            layoutManager = GridLayoutManager(this.context,3)
         }
     }
 

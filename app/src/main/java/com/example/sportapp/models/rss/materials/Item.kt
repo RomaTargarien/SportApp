@@ -15,7 +15,7 @@ data class Item(
     @PropertyElement val link: String,
     @PropertyElement val description: String,
     @PropertyElement(name = "pubDate",converter = DateConverter::class) val published: Date,
-    @Element val enclosure: Enclosure,
+    @Element(name = "media:content") val enclosure: Enclosure,
     @PropertyElement val category: String,
     @PrimaryKey
     @PropertyElement val guid: String

@@ -13,17 +13,25 @@
         <action
             android:id="@+id/action_homeFragment_to_itemFragment"
             app:destination="@id/itemFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_selectedCategoryFragment"
+            app:destination="@id/selectedCategoryFragment" />
     </fragment>
     <fragment
-        android:id="@+id/searchFragment"
-        android:name="com.example.sportapp.ui.main.fragments.SearchFragment"
+        android:id="@+id/categoriesFragment"
+        android:name="com.example.sportapp.ui.main.fragments.CategoriesFragment"
         android:label="fragment_search"
-        tools:layout="@layout/fragment_search" />
+        tools:layout="@layout/fragment_categories" >
+        <action
+            android:id="@+id/action_categoriesFragment_to_selectedCategoryFragment"
+            app:destination="@id/selectedCategoryFragment" />
+    </fragment>
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.sportapp.ui.main.fragments.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
+
     <fragment
         android:id="@+id/itemFragment"
         android:name="com.example.sportapp.ui.main.fragments.ItemFragment"
@@ -35,5 +43,22 @@
         <argument
             android:name="link"
             app:argType="string"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/selectedCategoryFragment"
+        android:name="com.example.sportapp.ui.main.fragments.SelectedCategoryFragment"
+        android:label="fragment_selected_category"
+        tools:layout="@layout/fragment_selected_category">
+        <argument
+            android:name="category"
+            app:argType="string">
+        </argument>
+        <action
+            android:id="@+id/action_selectedCategoryFragment_to_categoriesFragment"
+            app:destination="@id/categoriesFragment" />
+        <action
+            android:id="@+id/action_selectedCategoryFragment_to_itemFragment"
+            app:destination="@id/itemFragment" />
     </fragment>
 </navigation>

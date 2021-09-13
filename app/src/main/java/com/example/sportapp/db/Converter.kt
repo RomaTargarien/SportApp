@@ -9,13 +9,12 @@ class Converter {
         @TypeConverter
         @JvmStatic
         fun fromEnclosure(enclosure: Enclosure): String {
-            return "${enclosure.url}|${enclosure.length}|${enclosure.type}"
+            return enclosure.url
         }
         @TypeConverter
         @JvmStatic
         fun toEnclosure(string: String): Enclosure {
-            val list = string.split("|")
-            return Enclosure(list[0],list[1].toInt(),list[2])
+            return Enclosure(string)
         }
         @TypeConverter
         @JvmStatic

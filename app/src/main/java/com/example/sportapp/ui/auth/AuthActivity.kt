@@ -2,6 +2,7 @@ package com.example.sportapp.ui.auth
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import com.example.sportapp.R
 import com.example.sportapp.other.states.Resource
@@ -28,8 +29,10 @@ class AuthActivity : AppCompatActivity() {
         viewModelForgotPassword = ViewModelProvider(this).get(ForgotPasswordViewModel::class.java)
         router = AuthRouter(this,MainActivity())
 
+
         if (FirebaseAuth.getInstance().currentUser != null) {
             router.enterActivity()
+            Log.d("TAG",FirebaseAuth.getInstance().uid.toString())
         }
         viewModelLogin.loginStatus.subscribe({
             if (it is Resource.Success) {

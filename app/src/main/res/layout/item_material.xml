@@ -55,7 +55,7 @@
                 android:layout_marginTop="26dp"
                 android:textColor="@color/black"
                 android:textDirection="ltr"
-                android:textSize="12sp"
+                android:textSize="16sp"
                 app:layout_constraintStart_toEndOf="@+id/ivMaterial"
                 app:layout_constraintTop_toTopOf="parent" />
 
