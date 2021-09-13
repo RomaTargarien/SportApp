@@ -6,6 +6,7 @@
     android:layout_height="57dp">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/categoryCard"
         android:layout_width="410dp"
         android:layout_height="60dp"
         android:elevation="6dp"

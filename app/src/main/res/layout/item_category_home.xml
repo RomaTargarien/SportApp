@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="120dp"
+    android:id="@+id/categoryCard"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:elevation="6dp"
+    app:cardCornerRadius="4dp"
+    android:layout_height="30dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:background="#F8F6F6"
+        android:layout_height="match_parent">
+
+        <TextView
+            style="@style/SubTittleTextViewStyle"
+            android:id="@+id/tvCategoryTittle"
+            android:textSize="12sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.545"/>
+
+        <ImageView
+            android:id="@+id/ivDeleteCategory"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="4dp"
+            android:src="@drawable/remove"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</androidx.cardview.widget.CardView>

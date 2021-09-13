@@ -20,8 +20,8 @@ interface NewsDao {
     @Query("DELETE FROM items")
     fun delete()
 
-    @Query("SELECT * FROM items ORDER BY published DESC LIMIT :limit OFFSET :offset")
-    fun getItemsWithOffset(offset: Int,limit: Int = 10): List<Item>
+    @Query("SELECT * FROM items WHERE category LIKE :category2 ORDER BY published DESC LIMIT :limit OFFSET :offset")
+    fun getItemsWithOffset(offset: Int,limit: Int = 10,category2: String): List<Item>
 
 
 }
