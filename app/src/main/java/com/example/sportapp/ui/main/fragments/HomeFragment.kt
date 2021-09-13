@@ -28,7 +28,6 @@ import com.example.sportapp.other.states.ListState
 import com.example.sportapp.ui.main.viewModels.HomeFragmentViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import retrofit2.Retrofit
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
