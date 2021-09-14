@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.navigationBarColor = resources.getColor(R.color.black)
         }
+        supportActionBar?.hide()
         noInternetChecking()
 
         //navigation

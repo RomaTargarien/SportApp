@@ -27,7 +27,6 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
-import androidx.work.*
 import com.example.sportapp.R
 import com.example.sportapp.adapters.HomeCategoriesAdapter
 import com.example.sportapp.adapters.MaterialsAdapter
