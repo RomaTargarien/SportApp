@@ -2,6 +2,7 @@ package com.example.sportapp.ui.main.fragments
 
 import android.content.ClipData
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -9,8 +10,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
+import androidx.annotation.RequiresApi
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -22,14 +27,18 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
+import androidx.work.*
 import com.example.sportapp.R
 import com.example.sportapp.adapters.HomeCategoriesAdapter
 import com.example.sportapp.adapters.MaterialsAdapter
+import com.example.sportapp.background.NewsWorker
 
 import com.example.sportapp.databinding.FragmentHomeBinding
+import com.example.sportapp.decorators.SpacesItemHorizontalDecoration
 import com.example.sportapp.decorators.SpacesItemVerticalDecoration
 import com.example.sportapp.models.rss.materials.Item
 import com.example.sportapp.other.Constants.OFFSET
+import com.example.sportapp.other.ext.forEachChildView
 import com.example.sportapp.other.states.DbState
 import com.example.sportapp.other.states.ListState
 import com.example.sportapp.ui.main.viewModels.HomeFragmentViewModel
@@ -42,69 +51,50 @@ import java.util.concurrent.TimeUnit
 class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
-    private val viewModel by viewModels<HomeFragmentViewModel>()
+    private lateinit var viewModel: HomeFragmentViewModel
     private lateinit var materialsAdapter: MaterialsAdapter
     private lateinit var categoriesHomeAdapter: HomeCategoriesAdapter
     private var likedCategories = emptyList<String>().toMutableList()
     private var offset = 0
-    private var isLoading = false
     private var isLastItems = false
-    private var isScrolling = false
     private var viewVisible = false
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(layoutInflater,container,false)
+        viewModel = ViewModelProvider(requireActivity()).get(HomeFragmentViewModel::class.java)
         setUpRefreshing()
         setUpRecyclerView()
+        enablePagination(binding.scroller)
 
-//        val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.UNMETERED)
-//            .build()
-//
-//        val periodicRequest = PeriodicWorkRequest
-//            .Builder(NewsWorker::class.java,15,TimeUnit.MINUTES)
-//            .setConstraints(constraints)
-//            .build()
-//
-//
-//        WorkManager.getInstance().enqueueUniquePeriodicWork(
-//            "NEWS_WORKER",
-//            ExistingPeriodicWorkPolicy.KEEP,
-//            periodicRequest)
-
-        materialsAdapter.setOnClickListener {
-            val bundle = Bundle().apply {
-                putString("link",it.link)
-            }
-            Log.d("TAG","pressed")
-            findNavController().navigate(
-                R.id.action_homeFragment_to_itemFragment,
-                bundle
-            )
+        //goToSelectedItemScreen
+        materialsAdapter.setOnItemClickListener {
+            val bundle = Bundle().apply { putString("link",it.link) }
+            viewModel.goToSelectedItemScreen.onNext(bundle)
         }
 
+        //goToSelectedCatgoryScreen
         categoriesHomeAdapter.setOnItemClickListener {
-            val bundle = Bundle().apply {
-                putString("category",it)
-            }
-            findNavController().navigate(
-                R.id.action_homeFragment_to_selectedCategoryFragment,
-                bundle
-            )
+            val bundle = Bundle().apply { putString("category",it) }
+            viewModel.goToSelectedCategoryScreen.onNext(bundle)
         }
 
+        //Deleting selected category
         categoriesHomeAdapter.setOnDeleteButtonClickListener {
             likedCategories.remove(it)
             viewModel.updateLikedCategories.onNext(likedCategories)
         }
 
+        //Displaying liked categories
         viewModel.likedCategories.observeOn(AndroidSchedulers.mainThread()).subscribe({
            likedCategories = it.toMutableList()
            categoriesHomeAdapter.differ.submitList(it)
         },{})
 
+        //OpenCategories
         binding.ibLike.setOnClickListener {
             TransitionManager.beginDelayedTransition(binding.container)
             viewVisible = !viewVisible
@@ -144,63 +134,43 @@ class HomeFragment : Fragment() {
            materialsAdapter.differ.submitList(it)
 
         },{})
+
         return binding.root
     }
 
-
-    //Pagination
-    private val scrollListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            super.onScrolled(recyclerView, dx, dy)
-
-            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-            val visibleItemCount = layoutManager.childCount
-            val totalItemCount = layoutManager.itemCount
-
-            val isNotLoadingAndNotLast = !isLoading && !isLastItems
-            val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
-            val isNotAtBeginnig = firstVisibleItemPosition >= 0
-            val isTotalMoreThanVisible = totalItemCount >= 10
-            val shouldPaginate = isNotLoadingAndNotLast && isAtLastItem && isNotAtBeginnig
-                    && isTotalMoreThanVisible && isScrolling
-            if (shouldPaginate) {
-                viewModel.getDataWithOffset.onNext(ListState.Fulled(offset))
-                offset += OFFSET
-                isScrolling = false
-            } else {
-                binding.rvNews.setPadding(0,0,0,0)
-            }
-        }
-
-        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            super.onScrollStateChanged(recyclerView, newState)
-            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                isScrolling = true
-            }
-        }
-    }
-
-    //RecyclerView
     private fun setUpRecyclerView() {
         materialsAdapter = MaterialsAdapter()
         binding.rvNews.apply {
             adapter = materialsAdapter
-            layoutManager = LinearLayoutManager(this.context,LinearLayoutManager.VERTICAL,false)
-            addOnScrollListener(this@HomeFragment.scrollListener)
+            layoutManager = LinearLayoutManager(this@HomeFragment.requireContext(),LinearLayoutManager.VERTICAL,false)
+            ViewCompat.setNestedScrollingEnabled(this,true)
             addItemDecoration(SpacesItemVerticalDecoration(25))
         }
 
         categoriesHomeAdapter = HomeCategoriesAdapter()
         binding.rvCategories.apply {
             adapter = categoriesHomeAdapter
-            layoutManager = GridLayoutManager(this.context,3)
+            layoutManager = LinearLayoutManager(this@HomeFragment.requireContext(),LinearLayoutManager.HORIZONTAL,false)
+            addItemDecoration(SpacesItemHorizontalDecoration(20))
         }
     }
 
-    //PullToRefresh
     private fun setUpRefreshing() {
         binding.itemsToRefresh.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(this.requireContext(),R.color.design_default_color_primary))
         binding.itemsToRefresh.setColorSchemeColors(Color.WHITE)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun enablePagination(nestedScrollView: NestedScrollView) {
+        nestedScrollView.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            v as NestedScrollView
+            val container = v.getChildAt(0) as ConstraintLayout
+            val recyler = container.getChildAt(2)
+            if (recyler.bottom - (v.height + scrollY) == 0) {
+                Log.d("TAG","paginate")
+                viewModel.getDataWithOffset.onNext(ListState.Fulled(offset))
+                offset += OFFSET
+            }
+        }
     }
 }

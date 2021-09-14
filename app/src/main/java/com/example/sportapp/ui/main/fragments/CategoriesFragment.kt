@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sportapp.R
 import com.example.sportapp.adapters.CategoriesAdapter
@@ -26,7 +28,7 @@ class CategoriesFragment : Fragment() {
 
     private lateinit var binding: FragmentCategoriesBinding
     private lateinit var categoriesAdapter: CategoriesAdapter
-    private val viewModel by viewModels<CategoriesViewModel>()
+    private lateinit var viewModel: CategoriesViewModel
     private var categoryTitles = emptyList<String>().toMutableList()
 
     override fun onCreateView(
@@ -34,21 +36,16 @@ class CategoriesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentCategoriesBinding.inflate(inflater,container,false)
-        categoriesAdapter = CategoriesAdapter()
-        categoriesAdapter.setOnClickListener {
-            val bundle = Bundle().apply {
-                putString("category",it)
-            }
-            findNavController().navigate(R.id.action_categoriesFragment_to_selectedCategoryFragment,bundle)
-        }
-        viewModel.likedCategories.observeOn(AndroidSchedulers.mainThread()).subscribe({
-            categoryTitles = it.toMutableList()
-            for (category in categories) {
-                category.isLiked = category.tittle in it
-            }
-            categoriesAdapter.differ.submitList(categories)
-        },{})
+        viewModel = ViewModelProvider(requireActivity()).get(CategoriesViewModel::class.java)
+        setUpRecyclerView()
 
+        //onItemClickListener
+        categoriesAdapter.setOnItemClickListener {
+            val bundle = Bundle().apply { putString("category",it) }
+            viewModel.goToSelectedCategoryScreen.onNext(bundle)
+        }
+
+        //onHeartClickListener
         categoriesAdapter.setOnHeartClickListener {
             if (!(it in categoryTitles)) {
                 categoryTitles.add(it)
@@ -57,11 +54,25 @@ class CategoriesFragment : Fragment() {
             }
             viewModel.updateLikedCategories.onNext(categoryTitles)
         }
-        binding.rvCategories.apply {
-            layoutManager = LinearLayoutManager(this.context,LinearLayoutManager.VERTICAL,false)
-            adapter = categoriesAdapter
-            addItemDecoration(SpacesItemVerticalDecoration(10))
-        }
+
+        //Displaying liked categories
+        viewModel.likedCategories.observeOn(AndroidSchedulers.mainThread()).subscribe({
+            categoryTitles = it.toMutableList()
+            for (category in categories) {
+                category.isLiked = category.tittle in it
+            }
+            categoriesAdapter.differ.submitList(categories)
+        },{})
+
         return binding.root
+    }
+
+    private fun setUpRecyclerView() {
+        categoriesAdapter = CategoriesAdapter()
+        binding.rvCategories.apply {
+            layoutManager = GridLayoutManager(this@CategoriesFragment.requireContext(),2)
+            adapter = categoriesAdapter
+            addItemDecoration(SpacesItemVerticalDecoration(20))
+        }
     }
 }

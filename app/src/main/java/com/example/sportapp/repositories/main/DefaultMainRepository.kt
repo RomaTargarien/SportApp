@@ -44,7 +44,7 @@ class DefaultMainRepository @Inject constructor(private val dao: NewsDao,private
         dao.putNewItems(items)
     }
 
-    override fun fetchDataFromDatabase(): Observable<List<Item>> {
+    override fun fetchDataFromDatabase(): List<Item> {
         return dao.getAllNews()
     }
 

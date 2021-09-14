@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.example.sportapp.databinding.ItemCategoryHomeBinding
 import com.example.sportapp.models.ui.Category
+import com.example.sportapp.other.ext.returnIconId
 
 class HomeCategoriesAdapter : RecyclerView.Adapter<HomeCategoriesAdapter.HomeCategoriesViewHolder>() {
 
@@ -18,6 +19,7 @@ class HomeCategoriesAdapter : RecyclerView.Adapter<HomeCategoriesAdapter.HomeCat
             binding.categoryCard.setOnClickListener {
                 onItemClickListener?.let { it(tittle) }
             }
+            binding.ivCategoryIcon.setImageResource(tittle.returnIconId())
             binding.ivDeleteCategory.setOnClickListener {
                 onDeleteButtonClickListener?.let { it(tittle) }
             }

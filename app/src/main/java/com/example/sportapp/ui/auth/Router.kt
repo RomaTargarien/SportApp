@@ -9,12 +9,6 @@ import com.example.sportapp.R
 import com.example.sportapp.ui.auth.fragments.LoginFragmentDirections
 import com.example.sportapp.ui.main.MainActivity
 
-interface IAuthRouter {
-    fun goToForgotPasswordScreen()
-    fun goToRegisterScreen()
-    fun enterActivity()
-}
-
 class AuthRouter(
     val startActivity: AppCompatActivity,
     val activityToOpen: AppCompatActivity

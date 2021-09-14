@@ -69,7 +69,7 @@ class CategoriesAdapter(): RecyclerView.Adapter<CategoriesAdapter.CategoryViewHo
 
     private var onItemClickListener: ((String)-> Unit)? = null
 
-    fun setOnClickListener(listener: (String) -> Unit) {
+    fun setOnItemClickListener(listener: (String) -> Unit) {
         onItemClickListener = listener
     }
 

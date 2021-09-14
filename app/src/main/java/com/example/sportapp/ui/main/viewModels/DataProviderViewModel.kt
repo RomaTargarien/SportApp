@@ -64,9 +64,7 @@ abstract class DataProviderViewModel(
                         if (materials.hasValue()) {
                             list.addAll(materials.value)
                         }
-                        Log.d("TAG",it.category)
                         val items = mainApiRepository.fetchWithOffset(it.offset,category = it.category)
-                        Log.d("TAG",items.size.toString())
                         if ((items.isEmpty() || items.size < 20) && it.offset == 0) {
                             refresh.onNext(DbState.Empty(it.category.convertToRssQuery()))
                         } else if (items.isEmpty()) {
@@ -87,6 +85,7 @@ abstract class DataProviderViewModel(
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
+                Log.d("TAG","size - ${it.first.size.toString()}")
                 materials.onNext(it.first.toMutableList())
                 if (it.second is ListState.Reload) {
                     smoothScrollToFirstPosition.onNext(Unit)

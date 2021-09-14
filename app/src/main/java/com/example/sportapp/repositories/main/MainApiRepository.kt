@@ -12,7 +12,7 @@ import io.reactivex.rxjava3.subjects.BehaviorSubject
 interface MainApiRepository {
     fun getApiMaterials(rssQuery: String = "news.rss"): Single<Rss>
     fun insertDataInDatabase(items: List<Item>)
-    fun fetchDataFromDatabase(): Observable<List<Item>>
+    fun fetchDataFromDatabase(): List<Item>
     fun delete()
     fun fetchWithOffset(offset: Int,limit: Int = LIMIT,category: String = "%"): List<Item>
     fun updateUsersLikedCategories(likedCatgories: List<String>): Single<Unit>

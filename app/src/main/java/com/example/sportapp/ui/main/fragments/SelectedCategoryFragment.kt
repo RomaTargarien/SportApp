@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.AbsListView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +21,7 @@ import com.example.sportapp.databinding.FragmentCategoriesBinding
 import com.example.sportapp.databinding.FragmentHomeBinding
 import com.example.sportapp.databinding.FragmentSelectedCategoryBinding
 import com.example.sportapp.decorators.SpacesItemVerticalDecoration
+import com.example.sportapp.models.rss.materials.Item
 import com.example.sportapp.other.Constants
 import com.example.sportapp.other.ext.convertToRssQuery
 import com.example.sportapp.other.states.DbState
@@ -34,7 +36,7 @@ class SelectedCategoryFragment : Fragment() {
 
     val args: SelectedCategoryFragmentArgs by navArgs()
     private lateinit var binding: FragmentSelectedCategoryBinding
-    private val viewModel by viewModels<SelectedCategoryViewModel>()
+    private lateinit var viewModel: SelectedCategoryViewModel
     lateinit var materialsAdapter: MaterialsAdapter
     private var offset = 0
     private var isLoading = false
@@ -47,19 +49,16 @@ class SelectedCategoryFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentSelectedCategoryBinding.inflate(layoutInflater,container,false)
+        viewModel = ViewModelProvider(requireActivity()).get(SelectedCategoryViewModel::class.java)
         setUpRefreshing()
         setUpRecyclerView()
         category = args.category
+        viewModel.isBottomNavMenuHiden.onNext(true)
 
-        materialsAdapter.setOnClickListener {
-            val bundle = Bundle().apply {
-                putString("link",it.link)
-            }
-            Log.d("TAG","pressed")
-            findNavController().navigate(
-                R.id.action_selectedCategoryFragment_to_itemFragment,
-                bundle
-            )
+        //OnItemClickListener
+        materialsAdapter.setOnItemClickListener {
+            val bundle = Bundle().apply { putString("link",it.link) }
+            viewModel.goToSelectedItemScreen.onNext(bundle)
         }
 
         //refreshing
@@ -97,8 +96,6 @@ class SelectedCategoryFragment : Fragment() {
         return binding.root
     }
 
-
-    //Pagination
     private val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
@@ -131,7 +128,6 @@ class SelectedCategoryFragment : Fragment() {
         }
     }
 
-    //RecyclerView
     private fun setUpRecyclerView() {
         materialsAdapter = MaterialsAdapter()
 
@@ -147,5 +143,11 @@ class SelectedCategoryFragment : Fragment() {
     private fun setUpRefreshing() {
         binding.itemsToRefresh.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(this.requireContext(),R.color.design_default_color_primary))
         binding.itemsToRefresh.setColorSchemeColors(Color.WHITE)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.materials.onNext(emptyList<Item>().toMutableList())
+        viewModel.isBottomNavMenuHiden.onNext(false)
     }
 }

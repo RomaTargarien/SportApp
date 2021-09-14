@@ -1,5 +1,6 @@
 package com.example.sportapp.ui.main.viewModels
 
+import android.os.Bundle
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
@@ -19,6 +20,9 @@ class SelectedCategoryViewModel @ViewModelInject constructor(
     mainApiRepository: MainApiRepository
 ): DataProviderViewModel(mainApiRepository) {
 
+    val isBottomNavMenuHiden = PublishSubject.create<Boolean>()
+
+    val goToSelectedItemScreen = PublishSubject.create<Bundle>()
 
 
 }

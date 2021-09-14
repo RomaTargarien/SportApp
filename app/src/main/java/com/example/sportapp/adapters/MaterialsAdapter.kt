@@ -105,7 +105,7 @@ class MaterialsAdapter() : RecyclerView.Adapter<MaterialsAdapter.MaterialsViewHo
 
     private var onItemClickListener: ((Item)-> Unit)? = null
 
-    fun setOnClickListener(listener: (Item) -> Unit) {
+    fun setOnItemClickListener(listener: (Item) -> Unit) {
         onItemClickListener = listener
     }
      

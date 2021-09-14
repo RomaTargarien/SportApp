@@ -21,6 +21,7 @@
     <string name="webClientId">1072225620886-66orfsgtcejsf5gftjkk6fkh6vdadths.apps.googleusercontent.com</string>
     <string name="go_to_email">Go to your email for changing the password</string>
     <string name="google_access">Access with Google</string>
+    <string name="MyCategories">Мои категории</string>
 </resources>
 
 

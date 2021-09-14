@@ -1,5 +1,6 @@
 package com.example.sportapp.ui.main.viewModels
 
+import android.os.Bundle
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
@@ -24,6 +25,9 @@ class HomeFragmentViewModel @ViewModelInject constructor(
 
    val likedCategories = BehaviorSubject.create<List<String>>()
    val updateLikedCategories = BehaviorSubject.create<List<String>>()
+
+   val goToSelectedCategoryScreen = PublishSubject.create<Bundle>()
+   val goToSelectedItemScreen = PublishSubject.create<Bundle>()
 
    init {
 

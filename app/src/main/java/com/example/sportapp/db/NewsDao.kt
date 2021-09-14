@@ -12,7 +12,7 @@ import io.reactivex.rxjava3.core.Single
 interface NewsDao {
 
     @Query("SELECT * FROM items ORDER BY published DESC")
-    fun getAllNews(): Observable<List<Item>>
+    fun getAllNews(): List<Item>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun putNewItems(items: List<Item>)
