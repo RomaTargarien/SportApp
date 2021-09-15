@@ -27,10 +27,10 @@
             app:destination="@id/selectedCategoryFragment" />
     </fragment>
     <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.example.sportapp.ui.main.fragments.SettingsFragment"
-        android:label="fragment_settings"
-        tools:layout="@layout/fragment_settings" />
+        android:id="@+id/userFragment"
+        android:name="com.example.sportapp.ui.main.fragments.UserFragmemt"
+        android:label="fragment_user"
+        tools:layout="@layout/fragment_user" />
 
     <fragment
         android:id="@+id/itemFragment"

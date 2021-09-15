@@ -25,17 +25,15 @@ class DefaultMainRepository @Inject constructor(private val dao: NewsDao,private
     override fun getApiMaterials(rssQuery: String): Single<Rss> {
         return Single.create { emiter ->
             val call = materialsApi.getMaterials(rssQuery)
-            if (!call.isExecuted) {
+            if (call.isCanceled) {
+                emiter.onError(Exception(""))
+            } else {
                 val response = call.execute()
                 if (response.isSuccessful) {
                     emiter.onSuccess(response.body())
                 } else {
                     emiter.onError(Exception(""))
                 }
-            } else if (call.isCanceled) {
-                emiter.onError(Exception(""))
-            } else {
-                emiter.onError(Exception(""))
             }
         }
     }

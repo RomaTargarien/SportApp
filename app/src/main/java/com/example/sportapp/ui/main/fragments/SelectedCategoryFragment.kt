@@ -24,8 +24,10 @@ import com.example.sportapp.decorators.SpacesItemVerticalDecoration
 import com.example.sportapp.models.rss.materials.Item
 import com.example.sportapp.other.Constants
 import com.example.sportapp.other.ext.convertToRssQuery
+import com.example.sportapp.other.snackbar
 import com.example.sportapp.other.states.DbState
 import com.example.sportapp.other.states.ListState
+import com.example.sportapp.other.states.Screen
 import com.example.sportapp.ui.main.viewModels.HomeFragmentViewModel
 import com.example.sportapp.ui.main.viewModels.SelectedCategoryViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -93,6 +95,11 @@ class SelectedCategoryFragment : Fragment() {
         viewModel.materials.observeOn(AndroidSchedulers.mainThread()).subscribe({
             materialsAdapter.differ.submitList(it)
         },{})
+
+        viewModel.resultMessage.observeOn(AndroidSchedulers.mainThread()).subscribe({
+            this.snackbar(it,Screen.SelectedCategory())
+        },{})
+
         return binding.root
     }
 

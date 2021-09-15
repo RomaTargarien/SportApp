@@ -89,6 +89,13 @@
             app:layout_constraintTop_toTopOf="parent">
         </ImageButton>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.6dp"
+            android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent">
+        </View>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -21,7 +21,10 @@
     <string name="webClientId">1072225620886-66orfsgtcejsf5gftjkk6fkh6vdadths.apps.googleusercontent.com</string>
     <string name="go_to_email">Go to your email for changing the password</string>
     <string name="google_access">Access with Google</string>
-    <string name="MyCategories">Мои категории</string>
+    <string name="MyCategories">Перейти к любимой категории</string>
+    <string name="error_while_refreshing">Не удалось обновить, попробуйте позже</string>
+    <string name="refreshing_complete">Лента обновлена</string>
+    <string name="no_fresh_news">Нет недавних новостей</string>
 </resources>
 
 

@@ -29,7 +29,6 @@ class CategoriesFragment : Fragment() {
     private lateinit var binding: FragmentCategoriesBinding
     private lateinit var categoriesAdapter: CategoriesAdapter
     private lateinit var viewModel: CategoriesViewModel
-    private var categoryTitles = emptyList<String>().toMutableList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,17 +46,11 @@ class CategoriesFragment : Fragment() {
 
         //onHeartClickListener
         categoriesAdapter.setOnHeartClickListener {
-            if (!(it in categoryTitles)) {
-                categoryTitles.add(it)
-            } else {
-                categoryTitles.remove(it)
-            }
-            viewModel.updateLikedCategories.onNext(categoryTitles)
+            viewModel.updateLikedCategories.onNext(it)
         }
 
         //Displaying liked categories
         viewModel.likedCategories.observeOn(AndroidSchedulers.mainThread()).subscribe({
-            categoryTitles = it.toMutableList()
             for (category in categories) {
                 category.isLiked = category.tittle in it
             }

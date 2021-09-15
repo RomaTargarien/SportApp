@@ -1,18 +1,26 @@
 package com.example.sportapp.other
 
 import android.content.Context
+import android.graphics.Color
 import android.util.DisplayMetrics
+import android.util.Log
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.MarginLayoutParamsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.example.sportapp.R
 import com.example.sportapp.databinding.ProgressScreenBinding
 import com.example.sportapp.other.ext.forEachChildView
 import com.example.sportapp.other.states.LoadingScreenState
+import com.example.sportapp.other.states.Screen
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_LONG
 import com.google.android.material.snackbar.Snackbar
 
@@ -74,3 +82,17 @@ fun progressScreenViewsVisibility(
 
 fun Int.toDp(context: Context): Int = TypedValue.applyDimension(
     TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics).toInt()
+
+fun Fragment.snackbar(string: String,screen: Screen) {
+    val snackBar = Snackbar.make(this.requireView(),string,Snackbar.LENGTH_LONG)
+    val view = snackBar.view
+    view.setBackgroundColor(resources.getColor(R.color.light_black))
+    val params = view.layoutParams as CoordinatorLayout.LayoutParams
+    if (screen is Screen.Home) {
+        params.gravity = Gravity.TOP
+        params.topMargin = 690.toDp(requireContext())
+    } else if (screen is Screen.SelectedCategory) {
+        params.gravity = Gravity.BOTTOM
+    }
+    snackBar.show()
+}

@@ -1,8 +1,10 @@
 package com.example.sportapp.ui.main.viewModels
 
+import android.content.Context
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
+import com.example.sportapp.R
 import com.example.sportapp.models.rss.materials.Item
 import com.example.sportapp.other.ext.convertRssQueryToCategory
 import com.example.sportapp.other.ext.convertToRssQuery
@@ -15,7 +17,8 @@ import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 
 abstract class DataProviderViewModel(
-    private var mainApiRepository: MainApiRepository
+    private var mainApiRepository: MainApiRepository,
+    private val applicationContext: Context
 ): ViewModel() {
 
     val refresh = PublishSubject.create<DbState>()
@@ -25,12 +28,14 @@ abstract class DataProviderViewModel(
     val getDataWithOffset = BehaviorSubject.create<ListState>()
     val isLastItems = BehaviorSubject.createDefault(false)
 
+    val resultMessage = PublishSubject.create<String>()
+
     init {
 
         refresh
             .observeOn(Schedulers.io())
             .switchMapSingle { dbState ->
-                Log.d("TAG",dbState.rssQuery)
+                Log.d("TAG","refresh")
                 mainApiRepository.getApiMaterials(dbState.rssQuery).map {
                     Pair(dbState,it.channel.items)
                 }
@@ -50,8 +55,14 @@ abstract class DataProviderViewModel(
             .doOnNext { (list,category) ->
                 if (!list.isEmpty()) {
                     getDataWithOffset.onNext(ListState.Reload(category))
+                } else {
+                    resultMessage.onNext(applicationContext.getString(R.string.no_fresh_news))
                 }
             }
+            .doOnError {
+                resultMessage.onNext(applicationContext.getString(R.string.error_while_refreshing))
+            }
+            .retry()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe()
 
@@ -63,9 +74,11 @@ abstract class DataProviderViewModel(
                         val list = mutableListOf<Item>()
                         if (materials.hasValue()) {
                             list.addAll(materials.value)
+                            Log.d("TAG",materials.value.size.toString())
                         }
                         val items = mainApiRepository.fetchWithOffset(it.offset,category = it.category)
                         if ((items.isEmpty() || items.size < 20) && it.offset == 0) {
+                            Log.d("TAG","refresh0")
                             refresh.onNext(DbState.Empty(it.category.convertToRssQuery()))
                         } else if (items.isEmpty()) {
                             isLastItems.onNext(true)
@@ -89,6 +102,7 @@ abstract class DataProviderViewModel(
                 materials.onNext(it.first.toMutableList())
                 if (it.second is ListState.Reload) {
                     smoothScrollToFirstPosition.onNext(Unit)
+                    resultMessage.onNext(applicationContext.getString(R.string.refreshing_complete))
                 }
             },{})
     }

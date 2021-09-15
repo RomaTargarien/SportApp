@@ -15,7 +15,7 @@ class CategoriesViewModel @ViewModelInject constructor(
     mainApiRepository: MainApiRepository
 ): ViewModel() {
 
-    val updateLikedCategories = BehaviorSubject.create<List<String>>()
+    val updateLikedCategories = BehaviorSubject.create<String>()
     val likedCategories = BehaviorSubject.create<List<String>>()
 
     val goToSelectedCategoryScreen = PublishSubject.create<Bundle>()
@@ -23,6 +23,18 @@ class CategoriesViewModel @ViewModelInject constructor(
     init {
 
         updateLikedCategories.observeOn(Schedulers.io())
+            .map {
+                val list = mutableListOf<String>()
+                if (likedCategories.hasValue()) {
+                    list.addAll(likedCategories.value)
+                }
+                if (it in list) {
+                    list.remove(it)
+                } else {
+                    list.add(it)
+                }
+                list
+            }
             .switchMapSingle {
                 mainApiRepository.updateUsersLikedCategories(it)
             }

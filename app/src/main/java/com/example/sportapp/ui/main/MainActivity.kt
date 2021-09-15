@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         selectedCategoryViewModel = ViewModelProvider(this).get(SelectedCategoryViewModel::class.java)
         homeViewModel = ViewModelProvider(this).get(HomeFragmentViewModel::class.java)
         categoriesViewModel = ViewModelProvider(this).get(CategoriesViewModel::class.java)
-        router = MainRouter(this,binding)
+        router = MainRouter(this,binding,homeViewModel)
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.navigationBarColor = resources.getColor(R.color.black)
@@ -72,9 +72,9 @@ class MainActivity : AppCompatActivity() {
         },{})
         selectedCategoryViewModel.isBottomNavMenuHiden.subscribe({
             if (it) {
-                binding.flFragmentContainer.setPadding(0,0,0,0)
+                binding.flFragmentContainer.setPadding(0,40.toDp(this),0,0)
             } else {
-                binding.flFragmentContainer.setPadding(0,0,0,56.toDp(this))
+                binding.flFragmentContainer.setPadding(0,40.toDp(this),0,56.toDp(this))
             }
             binding.bottomAppBar.isVisible = !it
         },{})

@@ -1,6 +1,7 @@
 package com.example.sportapp.ui.main
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -8,8 +9,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.sportapp.R
 import com.example.sportapp.databinding.ActivityMainBinding
+import com.example.sportapp.ui.main.viewModels.DataProviderViewModel
 
-class MainRouter(val mainActivity: AppCompatActivity,val binding: ActivityMainBinding) : IMainRouter {
+class MainRouter(
+    val mainActivity: AppCompatActivity,
+    val binding: ActivityMainBinding,
+    val viewModel: DataProviderViewModel
+    ) : IMainRouter {
 
     init {
 
@@ -18,6 +24,13 @@ class MainRouter(val mainActivity: AppCompatActivity,val binding: ActivityMainBi
         binding.bottomNavigationView.apply {
             background = null
             setupWithNavController(navHostFragment.findNavController())
+            setOnItemReselectedListener {
+                when (it.itemId) {
+                    R.id.homeFragment -> {
+                        viewModel.smoothScrollToFirstPosition.onNext(Unit)
+                    }
+                }
+            }
         }
     }
 

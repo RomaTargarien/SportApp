@@ -30,16 +30,16 @@ import androidx.transition.TransitionSet
 import com.example.sportapp.R
 import com.example.sportapp.adapters.HomeCategoriesAdapter
 import com.example.sportapp.adapters.MaterialsAdapter
-import com.example.sportapp.background.NewsWorker
-
 import com.example.sportapp.databinding.FragmentHomeBinding
 import com.example.sportapp.decorators.SpacesItemHorizontalDecoration
 import com.example.sportapp.decorators.SpacesItemVerticalDecoration
 import com.example.sportapp.models.rss.materials.Item
 import com.example.sportapp.other.Constants.OFFSET
 import com.example.sportapp.other.ext.forEachChildView
+import com.example.sportapp.other.snackbar
 import com.example.sportapp.other.states.DbState
 import com.example.sportapp.other.states.ListState
+import com.example.sportapp.other.states.Screen
 import com.example.sportapp.ui.main.viewModels.HomeFragmentViewModel
 import com.example.sportapp.ui.main.viewModels.SelectedCategoryViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,7 +53,6 @@ class HomeFragment : Fragment() {
     private lateinit var viewModel: HomeFragmentViewModel
     private lateinit var materialsAdapter: MaterialsAdapter
     private lateinit var categoriesHomeAdapter: HomeCategoriesAdapter
-    private var likedCategories = emptyList<String>().toMutableList()
     private var offset = 0
     private var isLastItems = false
     private var viewVisible = false
@@ -63,77 +62,13 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d("TAG","onCreateView")
         binding = FragmentHomeBinding.inflate(layoutInflater,container,false)
         viewModel = ViewModelProvider(requireActivity()).get(HomeFragmentViewModel::class.java)
+
         setUpRefreshing()
         setUpRecyclerView()
         enablePagination(binding.scroller)
-
-        //goToSelectedItemScreen
-        materialsAdapter.setOnItemClickListener {
-            val bundle = Bundle().apply { putString("link",it.link) }
-            viewModel.goToSelectedItemScreen.onNext(bundle)
-        }
-
-        //goToSelectedCatgoryScreen
-        categoriesHomeAdapter.setOnItemClickListener {
-            val bundle = Bundle().apply { putString("category",it) }
-            viewModel.goToSelectedCategoryScreen.onNext(bundle)
-        }
-
-        //Deleting selected category
-        categoriesHomeAdapter.setOnDeleteButtonClickListener {
-            likedCategories.remove(it)
-            viewModel.updateLikedCategories.onNext(likedCategories)
-        }
-
-        //Displaying liked categories
-        viewModel.likedCategories.observeOn(AndroidSchedulers.mainThread()).subscribe({
-           likedCategories = it.toMutableList()
-           categoriesHomeAdapter.differ.submitList(it)
-        },{})
-
-        //OpenCategories
-        binding.ibLike.setOnClickListener {
-            TransitionManager.beginDelayedTransition(binding.container)
-            viewVisible = !viewVisible
-            binding.rvCategories.isVisible = viewVisible
-        }
-
-        //refreshing
-        binding.itemsToRefresh.setOnRefreshListener {
-            viewModel.refresh.onNext(DbState.Fulled())
-            binding.itemsToRefresh.isRefreshing = false
-        }
-
-        //smoothRecyclerToFirstPosition
-        viewModel.smoothScrollToFirstPosition
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                binding.rvNews.smoothScrollToPosition(0)
-            },{})
-
-        //Passing event to load data + changing the offset
-        viewModel.getDataWithOffset.onNext(ListState.Fulled(offset)).also {
-            offset += OFFSET
-        }
-
-        //Changing the offset after refreshing
-        viewModel.changeTheOffset.observeOn(AndroidSchedulers.mainThread()).subscribe({
-            offset = OFFSET
-        },{})
-
-        //Check if we habe load all items
-        viewModel.isLastItems.observeOn(AndroidSchedulers.mainThread()).subscribe({
-            isLastItems = it
-        },{})
-
-        //Passing items to the adapter
-        viewModel.materials.observeOn(AndroidSchedulers.mainThread()).subscribe({
-           materialsAdapter.differ.submitList(it)
-
-        },{})
-
         return binding.root
     }
 
@@ -167,9 +102,94 @@ class HomeFragment : Fragment() {
             val recyler = container.getChildAt(2)
             if (recyler.bottom - (v.height + scrollY) == 0) {
                 Log.d("TAG","paginate")
+                Log.d("TAG","getdata2")
                 viewModel.getDataWithOffset.onNext(ListState.Fulled(offset))
                 offset += OFFSET
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("TAG","onResume")
+        viewModel.materials.onNext(emptyList<Item>().toMutableList())
+
+        //goToSelectedItemScreen
+        materialsAdapter.setOnItemClickListener {
+            val bundle = Bundle().apply { putString("link",it.link) }
+            viewModel.goToSelectedItemScreen.onNext(bundle)
+        }
+
+        //goToSelectedCatgoryScreen
+        categoriesHomeAdapter.setOnItemClickListener {
+            val bundle = Bundle().apply { putString("category",it) }
+            viewModel.goToSelectedCategoryScreen.onNext(bundle)
+        }
+
+        //Deleting selected category
+        categoriesHomeAdapter.setOnDeleteButtonClickListener {
+            viewModel.updateLikedCategories.onNext(it)
+        }
+
+        //Displaying liked categories
+        viewModel.likedCategories.observeOn(AndroidSchedulers.mainThread()).subscribe({
+            categoriesHomeAdapter.differ.submitList(it)
+        },{})
+
+        //OpenCategories
+        binding.ibLike.setOnClickListener {
+            TransitionManager.beginDelayedTransition(binding.container)
+            viewVisible = !viewVisible
+            binding.rvCategories.isVisible = viewVisible
+        }
+
+        //refreshing
+        binding.itemsToRefresh.setOnRefreshListener {
+            viewModel.refresh.onNext(DbState.Fulled())
+            binding.itemsToRefresh.isRefreshing = false
+        }
+
+        //smoothRecyclerToFirstPosition
+        viewModel.smoothScrollToFirstPosition
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                binding.scroller.smoothScrollTo(0,0,2000)
+            },{})
+
+        //Passing event to load data + changing the offset
+        viewModel.getDataWithOffset.onNext(ListState.Fulled(offset)).also {
+            Log.d("TAG","getdata1")
+            offset += OFFSET
+        }
+
+        //Changing the offset after refreshing
+        viewModel.changeTheOffset.observeOn(AndroidSchedulers.mainThread()).subscribe({
+            offset = OFFSET
+        },{})
+
+        //Check if we habe load all items
+        viewModel.isLastItems.observeOn(AndroidSchedulers.mainThread()).subscribe({
+            isLastItems = it
+        },{})
+
+        //Passing items to the adapter
+        viewModel.materials.observeOn(AndroidSchedulers.mainThread()).subscribe({
+            materialsAdapter.differ.submitList(it)
+        },{})
+
+        viewModel.resultMessage.observeOn(AndroidSchedulers.mainThread()).subscribe({
+            this.snackbar(it,Screen.Home())
+        },{})
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("TAG","onStop")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("TAG","onPause")
+        offset = 0
     }
 }

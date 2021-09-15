@@ -9,7 +9,7 @@ import com.example.sportapp.R
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class SettingsFragment : Fragment() {
+class UserFragmemt : Fragment() {
 
 
     override fun onCreateView(
@@ -17,6 +17,6 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false)
+        return inflater.inflate(R.layout.fragment_user, container, false)
     }
 }

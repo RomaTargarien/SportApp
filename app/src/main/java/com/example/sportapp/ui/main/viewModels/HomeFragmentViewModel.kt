@@ -1,5 +1,6 @@
 package com.example.sportapp.ui.main.viewModels
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
@@ -20,11 +21,12 @@ import io.reactivex.rxjava3.subjects.PublishSubject
 
 
 class HomeFragmentViewModel @ViewModelInject constructor(
-   mainApiRepository: MainApiRepository
-): DataProviderViewModel(mainApiRepository) {
+   mainApiRepository: MainApiRepository,
+   private val applicationContext: Context
+): DataProviderViewModel(mainApiRepository,applicationContext) {
 
    val likedCategories = BehaviorSubject.create<List<String>>()
-   val updateLikedCategories = BehaviorSubject.create<List<String>>()
+   val updateLikedCategories = BehaviorSubject.create<String>()
 
    val goToSelectedCategoryScreen = PublishSubject.create<Bundle>()
    val goToSelectedItemScreen = PublishSubject.create<Bundle>()
@@ -32,6 +34,18 @@ class HomeFragmentViewModel @ViewModelInject constructor(
    init {
 
       updateLikedCategories.observeOn(Schedulers.io())
+         .map {
+            val list = mutableListOf<String>()
+            if (likedCategories.hasValue()) {
+               list.addAll(likedCategories.value)
+            }
+            if (it in list) {
+               list.remove(it)
+            } else {
+               list.add(it)
+            }
+            list
+         }
          .switchMapSingle {
             mainApiRepository.updateUsersLikedCategories(it)
          }
