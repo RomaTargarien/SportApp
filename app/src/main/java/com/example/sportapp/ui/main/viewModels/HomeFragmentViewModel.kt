@@ -56,7 +56,7 @@ class HomeFragmentViewModel @ViewModelInject constructor(
          .subscribeOn(Schedulers.io())
          .observeOn(AndroidSchedulers.mainThread())
          .subscribe({
-            likedCategories.onNext(it)
+            likedCategories.onNext(it.likedCategories)
          },{})
    }
 

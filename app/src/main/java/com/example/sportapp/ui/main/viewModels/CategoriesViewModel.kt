@@ -46,7 +46,7 @@ class CategoriesViewModel @ViewModelInject constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 Log.d("TAG",it.toString())
-                likedCategories.onNext(it)
+                likedCategories.onNext(it.likedCategories)
             },{})
     }
 }

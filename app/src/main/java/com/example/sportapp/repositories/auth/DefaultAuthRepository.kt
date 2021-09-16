@@ -1,6 +1,7 @@
 package com.example.sportapp.repositories.auth
 
 import com.example.sportapp.models.User
+import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth

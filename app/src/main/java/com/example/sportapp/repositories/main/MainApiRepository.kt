@@ -16,5 +16,8 @@ interface MainApiRepository {
     fun delete()
     fun fetchWithOffset(offset: Int,limit: Int = LIMIT,category: String = "%"): List<Item>
     fun updateUsersLikedCategories(likedCatgories: List<String>): Single<Unit>
-    fun subscribeToRealtimeUpdates(): Observable<List<String>>
+    fun subscribeToRealtimeUpdates(): Observable<User>
+    fun sendVerificationEmail(): Observable<Unit>
+    fun updateEmail(email:String): Observable<Unit>
+    fun changePassword(): Observable<Unit>
 }

@@ -20,9 +20,13 @@ import com.example.sportapp.R
 import com.example.sportapp.databinding.ActivityMainBinding
 import com.example.sportapp.other.toDp
 import com.example.sportapp.ui.auth.AuthActivity
+import com.example.sportapp.ui.main.dialogs.dialogViewModels.EmailChangeDialogViewModel
+import com.example.sportapp.ui.main.dialogs.dialogViewModels.EmailVerifyingViewModel
+import com.example.sportapp.ui.main.dialogs.dialogViewModels.PasswordChangeDialogViewModel
 import com.example.sportapp.ui.main.viewModels.CategoriesViewModel
 import com.example.sportapp.ui.main.viewModels.HomeFragmentViewModel
 import com.example.sportapp.ui.main.viewModels.SelectedCategoryViewModel
+import com.example.sportapp.ui.main.viewModels.UserFragmentViewModel
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import org.imaginativeworld.oopsnointernet.callbacks.ConnectionCallback
@@ -33,8 +37,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var selectedCategoryViewModel: SelectedCategoryViewModel
+    private lateinit var emailChangeDialogViewModel: EmailChangeDialogViewModel
     private lateinit var homeViewModel: HomeFragmentViewModel
     private lateinit var categoriesViewModel: CategoriesViewModel
+    private lateinit var userViewModel: UserFragmentViewModel
+    private lateinit var passwordChangeDialogViewModel: PasswordChangeDialogViewModel
+    private lateinit var emailVerifyingViewModel: EmailVerifyingViewModel
     private lateinit var router: IMainRouter
 
 
@@ -43,16 +51,45 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        Log.d("TAG",FirebaseAuth.getInstance().currentUser?.uid!!)
+        Log.d("TAG",FirebaseAuth.getInstance().currentUser?.isEmailVerified.toString())
 
         //ViewModelInitializing
         selectedCategoryViewModel = ViewModelProvider(this).get(SelectedCategoryViewModel::class.java)
+        emailChangeDialogViewModel = ViewModelProvider(this).get(EmailChangeDialogViewModel::class.java)
         homeViewModel = ViewModelProvider(this).get(HomeFragmentViewModel::class.java)
         categoriesViewModel = ViewModelProvider(this).get(CategoriesViewModel::class.java)
+        userViewModel = ViewModelProvider(this).get(UserFragmentViewModel::class.java)
+        passwordChangeDialogViewModel = ViewModelProvider(this).get(PasswordChangeDialogViewModel::class.java)
+        emailVerifyingViewModel = ViewModelProvider(this).get(EmailVerifyingViewModel::class.java)
         router = MainRouter(this,binding,homeViewModel)
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.navigationBarColor = resources.getColor(R.color.black)
         }
+
+        emailVerifyingViewModel.verifyingWasSent.subscribe({
+            FirebaseAuth.getInstance().signOut()
+            Intent(this, AuthActivity::class.java).also {
+                startActivity(it)
+            }
+            finish()
+        },{})
+
+        passwordChangeDialogViewModel.passwordHasChanged.subscribe({
+            FirebaseAuth.getInstance().signOut()
+            Intent(this, AuthActivity::class.java).also {
+                startActivity(it)
+            }
+            finish()
+        },{})
+        emailChangeDialogViewModel.emailHasChanged.subscribe({
+            FirebaseAuth.getInstance().signOut()
+            Intent(this, AuthActivity::class.java).also {
+                startActivity(it)
+            }
+            finish()
+        },{})
         supportActionBar?.hide()
         noInternetChecking()
 
@@ -70,6 +107,15 @@ class MainActivity : AppCompatActivity() {
         selectedCategoryViewModel.goToSelectedItemScreen.subscribe({
             router.fromSelectedCategoryScreenToItemScreen(it)
         },{})
+
+        userViewModel.logOut.subscribe({
+            FirebaseAuth.getInstance().signOut()
+            Intent(this, AuthActivity::class.java).also {
+                startActivity(it)
+            }
+            finish()
+        },{})
+
         selectedCategoryViewModel.isBottomNavMenuHiden.subscribe({
             if (it) {
                 binding.flFragmentContainer.setPadding(0,40.toDp(this),0,0)
@@ -86,11 +132,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.iLogOut -> {
-                FirebaseAuth.getInstance().signOut()
-                Intent(this, AuthActivity::class.java).also {
-                    startActivity(it)
-                }
-                finish()
+
             }
         }
         return super.onOptionsItemSelected(item)
