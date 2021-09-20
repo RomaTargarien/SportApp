@@ -1,5 +1,6 @@
 package com.example.sportapp.repositories.main
 
+import android.net.Uri
 import android.util.Log
 import com.example.sportapp.apis.MaterialsApi
 import com.example.sportapp.db.NewsDao
@@ -8,7 +9,10 @@ import com.example.sportapp.models.rss.materials.Item
 import com.example.sportapp.models.rss.materials.Rss
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -22,9 +26,8 @@ import kotlin.concurrent.timerTask
 class DefaultMainRepository @Inject constructor(private val dao: NewsDao,private val materialsApi: MaterialsApi): MainApiRepository {
 
     val users = FirebaseFirestore.getInstance().collection("users")
-    val user = FirebaseAuth.getInstance().currentUser
-    val uid = FirebaseAuth.getInstance().uid
     val auth = FirebaseAuth.getInstance()
+    private val storage = Firebase.storage
 
     override fun getApiMaterials(rssQuery: String): Single<Rss> {
         return Single.create { emiter ->
@@ -61,11 +64,11 @@ class DefaultMainRepository @Inject constructor(private val dao: NewsDao,private
 
     override fun updateUsersLikedCategories(likedCatgories: List<String>): Single<Unit> {
         return Single.create { emiter ->
-            val userQuery = users.whereEqualTo("uid",uid).get().addOnCompleteListener {
+            val userQuery = users.whereEqualTo("uid",auth.uid).get().addOnCompleteListener {
                 val result = it.result
                 result?.let {
                     if (!it.isEmpty) {
-                        users.document(uid!!).update("likedCategories",likedCatgories).addOnCompleteListener {
+                        users.document(auth.uid!!).update("likedCategories",likedCatgories).addOnCompleteListener {
                             emiter.onSuccess(Unit)
                         }.addOnFailureListener {
                             emiter.onError(it)
@@ -78,7 +81,7 @@ class DefaultMainRepository @Inject constructor(private val dao: NewsDao,private
 
     override fun subscribeToRealtimeUpdates(): Observable<User> {
         return Observable.create<User> { emiter ->
-            users.document(uid!!).addSnapshotListener { value, error ->
+            users.document(auth.uid!!).addSnapshotListener { value, error ->
                 error?.let {
                     emiter.onError(it)
                 }
@@ -86,11 +89,13 @@ class DefaultMainRepository @Inject constructor(private val dao: NewsDao,private
                     val categories: List<String>?
                     val name: String
                     val uid: String
+                    val userProfileImageUri: String
                     categories = it.get("likedCategories") as List<String>?
                     name = it.get("username") as String
                     uid = it.get("uid") as String
+                    userProfileImageUri = it.get("userProfileImageUri") as String
                     if (categories != null) {
-                        val user = User(uid,name,categories)
+                        val user = User(uid,name,categories,userProfileImageUri)
                         Log.d("TAG",user.toString())
                         emiter.onNext(user)
                     } else {
@@ -104,7 +109,7 @@ class DefaultMainRepository @Inject constructor(private val dao: NewsDao,private
 
     override fun sendVerificationEmail(): Observable<Unit> {
         return Observable.create { emiter ->
-            user?.sendEmailVerification()?.addOnCompleteListener { task ->
+            auth.currentUser?.sendEmailVerification()?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     emiter.onNext(Unit)
                 } else {
@@ -116,28 +121,76 @@ class DefaultMainRepository @Inject constructor(private val dao: NewsDao,private
 
     override fun updateEmail(email:String): Observable<Unit> {
         return Observable.create { emiter ->
-            user?.email?.let {
-                val credentials = EmailAuthProvider.getCredential(it,"1111111111")
-                user.reauthenticate(credentials)
+            auth.currentUser?.updateEmail(email)?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    emiter.onNext(Unit)
+                } else {
+                    emiter.onError(Exception(""))
+                }
+            }
+        }
+    }
+
+    override fun reauthenticate(password: String): Observable<Unit> {
+        return Observable.create { emiter ->
+            auth.currentUser?.email?.let {
+                val credentials = EmailAuthProvider.getCredential(it,password)
+                auth.currentUser!!.reauthenticate(credentials)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            user.updateEmail(email).addOnCompleteListener {
-                                Log.d("TAG","success")
-                                emiter.onNext(Unit)
-                            }
+                            emiter.onNext(Unit)
                         } else {
-                            Log.d("TAG","error")
                             emiter.onError(Exception(""))
                         }
                     }
             }
-
         }
     }
 
+    override fun updateUserProfileImage(imageUri: Uri): Observable<Unit> {
+        return Observable.create { emiter ->
+            storage
+                .getReference(auth.uid!!)
+                .putFile(imageUri)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                    task.result
+                        ?.metadata
+                        ?.reference
+                        ?.downloadUrl
+                        ?.addOnCompleteListener { uriTask->
+                            if (uriTask.isSuccessful) {
+                            users
+                                .document(auth.uid!!)
+                                .update("userProfileImageUri",uriTask.result.toString())
+                                .addOnCompleteListener { uploadTask ->
+                                    uploadTask
+                                        .addOnCompleteListener {
+                                            emiter.onNext(Unit)
+                                    }
+                                        .addOnFailureListener {
+                                            emiter.onError(it)
+                                        }
+
+                                }
+                                .addOnFailureListener {
+                                    emiter.onError(it)
+                                }
+                        }
+                    }
+                }
+            }
+                .addOnFailureListener {
+                    emiter.onError(it)
+                }
+        }
+    }
+
+
+
     override fun changePassword(): Observable<Unit> {
         return Observable.create { emiter ->
-            auth.sendPasswordResetEmail(user?.email!!)
+            auth.sendPasswordResetEmail(auth.currentUser!!.email!!)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         emiter.onNext(Unit)

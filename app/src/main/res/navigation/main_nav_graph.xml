@@ -15,7 +15,7 @@
             app:destination="@id/itemFragment" />
         <action
             android:id="@+id/action_homeFragment_to_selectedCategoryFragment"
-            app:destination="@id/selectedCategoryFragment" />
+            app:destination="@id/selectedCategoryFragment"/>
     </fragment>
     <fragment
         android:id="@+id/categoriesFragment"
@@ -26,11 +26,20 @@
             android:id="@+id/action_categoriesFragment_to_selectedCategoryFragment"
             app:destination="@id/selectedCategoryFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/userFragment"
         android:name="com.example.sportapp.ui.main.fragments.UserFragmemt"
         android:label="fragment_user"
-        tools:layout="@layout/fragment_user" />
+        tools:layout="@layout/fragment_user">
+        <action
+            android:id="@+id/action_userFragment_to_emailChangeFragment"
+            app:destination="@id/emailChangeFragment"
+            app:enterAnim="@anim/slide_from_bottom"
+            app:popExitAnim="@anim/slide_to_bottom"
+            app:popEnterAnim="@anim/slide_from_top"
+            app:exitAnim="@anim/slide_to_top"/>
+    </fragment>
 
     <fragment
         android:id="@+id/itemFragment"
@@ -60,5 +69,18 @@
         <action
             android:id="@+id/action_selectedCategoryFragment_to_itemFragment"
             app:destination="@id/itemFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/emailChangeFragment"
+        android:name="com.example.sportapp.ui.main.fragments.EmailChangeFragment"
+        android:label="fragment_email_change"
+        tools:layout="@layout/fragment_email_change" >
+        <action
+            android:id="@+id/action_emailChangeFragment_to_userFragment"
+            app:destination="@id/userFragment"
+            app:enterAnim="@anim/slide_to_top"
+            app:popEnterAnim="@anim/slide_to_top"
+            app:exitAnim="@anim/slide_from_bottom"
+            app:popExitAnim="@anim/slide_from_bottom"/>
     </fragment>
 </navigation>

@@ -1,10 +1,12 @@
 package com.example.sportapp.ui.main.viewModels
 
+import android.net.Uri
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import com.example.sportapp.models.User
 import com.example.sportapp.repositories.main.MainApiRepository
+import com.google.firebase.auth.UserProfileChangeRequest
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
@@ -18,8 +20,28 @@ class UserFragmentViewModel @ViewModelInject constructor(
     val logOut = PublishSubject.create<Unit>()
 
     val verifyEmail = PublishSubject.create<Unit>()
+    val isLogOutShown = PublishSubject.create<Boolean>()
+
+    val updateUserProfileImage = PublishSubject.create<Uri>()
+
+    val goToChangeEmailScreen = PublishSubject.create<Unit>()
+
+    val isProgressBarVisible = BehaviorSubject.createDefault(false)
 
     init {
+
+        updateUserProfileImage.observeOn(Schedulers.io())
+            .doOnNext {
+                isProgressBarVisible.onNext(true)
+            }
+            .switchMap {
+                mainApiRepository.updateUserProfileImage(it)
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                isProgressBarVisible.onNext(false)
+            },{})
+
         mainApiRepository.subscribeToRealtimeUpdates()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

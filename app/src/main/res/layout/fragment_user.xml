@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.main.fragments.UserFragment">
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:background="@color/black"
@@ -14,50 +15,64 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="300dp"
             android:background="#151515"
             app:layout_constraintTop_toTopOf="parent">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/circleImageView"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                app:civ_border_color="#FF000000"
+                android:id="@+id/userProfileImage"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                app:civ_border_color="#FFFFFF"
                 app:civ_border_width="2dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.498"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.37">
-
+                app:layout_constraintVertical_bias="0.2">
             </de.hdodenhof.circleimageview.CircleImageView>
+
+
+            <ProgressBar
+                android:id="@+id/imageProgressBar"
+                android:visibility="visible"
+                android:alpha="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/userProfileImage"
+                app:layout_constraintEnd_toEndOf="@+id/userProfileImage"
+                app:layout_constraintStart_toStartOf="@+id/userProfileImage"
+                app:layout_constraintTop_toTopOf="@+id/userProfileImage">
+
+            </ProgressBar>
 
             <TextView
                 android:id="@+id/tvUserName"
                 style="@style/TittleTextViewStyle"
-                android:textColor="@color/white"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:textSize="30sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/circleImageView"/>
+                app:layout_constraintTop_toBottomOf="@+id/userProfileImage"
+                app:layout_constraintVertical_bias="0.234" />
 
-
-            <TextView
-                android:id="@+id/tvLogOut"
-                style="@style/SubTittleTextViewStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:text="Log out"
+            <ImageButton
+                android:id="@+id/ibSelectPhoto"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/image_buttom_camera_shape"
+                android:src="@drawable/ic_baseline_camera_alt_24"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-            </TextView>
-
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvUserName">
+            </ImageButton>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -69,49 +84,147 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
             app:layout_constraintVertical_bias="0.017"
-            tools:layout_editor_absoluteX="0dp">
-        </androidx.recyclerview.widget.RecyclerView>
+            tools:layout_editor_absoluteX="0dp"/>
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/bnChangePassword"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="220dp"
-            android:text="Change Password"
-            android:textColor="@color/white"
-            android:background="@drawable/button_gradient"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.495"
-            app:layout_constraintStart_toStartOf="parent">
-        </androidx.appcompat.widget.AppCompatButton>
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/bnVerifyEmail"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="136dp"
-            android:text="Verify Email"
-            android:textColor="@color/white"
-            android:background="@drawable/button_gradient"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.495"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/bnChangeEmail"
-            android:layout_width="300dp"
-            android:text="Change email"
-            android:textColor="@color/white"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:background="@drawable/button_gradient"
-            app:layout_constraintEnd_toEndOf="parent"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#151515"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/bnVerifyEmail">
+            app:layout_constraintTop_toBottomOf="@+id/rvCategoriesUser">
 
-        </androidx.appcompat.widget.AppCompatButton>
+            <LinearLayout
+                android:id="@+id/layoutChangePassword"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/padlock"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    style="@style/SubTittleTextViewStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Сменить пароль"
+                    android:textColor="@color/white"
+                    app:layout_constraintStart_toEndOf="@+id/imageView2"
+                    app:layout_constraintTop_toTopOf="parent"/>
+            </LinearLayout>
+
+            <View
+                android:id="@+id/view"
+                android:layout_width="370dp"
+                android:layout_height="0.6dp"
+                android:background="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layoutChangePassword"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <LinearLayout
+                android:id="@+id/layoutVerifyEmail"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:orientation="horizontal"
+                app:layout_constraintVertical_bias="0.0"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layoutChangePassword">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/email_verify"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    style="@style/SubTittleTextViewStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Подверите адрес электронной почты"
+                    android:textColor="@color/white"
+                    app:layout_constraintStart_toEndOf="@+id/imageView2"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/ivEmailVerified"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginTop="18dp"
+                    android:layout_marginLeft="10dp"
+                    android:src="@drawable/error">
+                </ImageView>
+            </LinearLayout>
+
+            <View
+                android:layout_width="370dp"
+                android:layout_height="0.6dp"
+                android:background="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layoutChangePassword"
+                app:layout_constraintVertical_bias="0.453" />
+
+            <LinearLayout
+                android:id="@+id/layoutChangeEmail"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layoutChangePassword"
+                app:layout_constraintVertical_bias="0.8"
+                tools:layout_editor_absoluteX="0dp">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/email"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    style="@style/SubTittleTextViewStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Сменить адрес электронной почты"
+                    android:textColor="@color/white"
+                    app:layout_constraintStart_toEndOf="@+id/imageView2"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="370dp"
+                android:layout_height="0.6dp"
+                android:background="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layoutChangePassword"
+                app:layout_constraintVertical_bias="0.892" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

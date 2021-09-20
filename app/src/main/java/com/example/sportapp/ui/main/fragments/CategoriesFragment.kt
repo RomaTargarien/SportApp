@@ -18,16 +18,21 @@ import com.example.sportapp.decorators.SpacesItemVerticalDecoration
 import com.example.sportapp.models.ui.categories
 import com.example.sportapp.other.ext.getIndexOfCategory
 import com.example.sportapp.other.ext.getListOfTittles
+import com.example.sportapp.other.snackbar
+import com.example.sportapp.other.states.Resource
 import com.example.sportapp.ui.main.viewModels.CategoriesViewModel
 import com.example.sportapp.ui.main.viewModels.HomeFragmentViewModel
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 @AndroidEntryPoint
 class CategoriesFragment : Fragment() {
 
     private lateinit var binding: FragmentCategoriesBinding
     private lateinit var categoriesAdapter: CategoriesAdapter
+    private lateinit var disposes: CompositeDisposable
     private lateinit var viewModel: CategoriesViewModel
 
     override fun onCreateView(
@@ -36,6 +41,7 @@ class CategoriesFragment : Fragment() {
     ): View {
         binding = FragmentCategoriesBinding.inflate(inflater,container,false)
         viewModel = ViewModelProvider(requireActivity()).get(CategoriesViewModel::class.java)
+        disposes = CompositeDisposable()
         setUpRecyclerView()
 
         //onItemClickListener
@@ -46,18 +52,34 @@ class CategoriesFragment : Fragment() {
 
         //onHeartClickListener
         categoriesAdapter.setOnHeartClickListener {
-            viewModel.updateLikedCategories.onNext(it)
+            when (it) {
+                is Resource.Success -> {
+                    viewModel.updateLikedCategories.onNext(it.data)
+                }
+                is Resource.Error -> {
+                    snackbar(it.message!!,true)
+                }
+            }
         }
 
+        return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+
         //Displaying liked categories
-        viewModel.likedCategories.observeOn(AndroidSchedulers.mainThread()).subscribe({
+        disposes.add(viewModel.likedCategories.observeOn(AndroidSchedulers.mainThread()).subscribe({
             for (category in categories) {
                 category.isLiked = category.tittle in it
             }
             categoriesAdapter.differ.submitList(categories)
-        },{})
+        },{}))
+    }
 
-        return binding.root
+    override fun onPause() {
+        super.onPause()
+        disposes.clear()
     }
 
     private fun setUpRecyclerView() {
@@ -68,4 +90,6 @@ class CategoriesFragment : Fragment() {
             addItemDecoration(SpacesItemVerticalDecoration(20))
         }
     }
+
+
 }
