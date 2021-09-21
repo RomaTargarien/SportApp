@@ -1,5 +1,6 @@
 package com.example.sportapp.ui.main.fragments
 
+import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -8,12 +9,15 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
@@ -37,10 +41,10 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
-    private lateinit var viewModel: HomeFragmentViewModel
     private lateinit var materialsAdapter: MaterialsAdapter
     private lateinit var categoriesHomeAdapter: HomeCategoriesAdapter
     private lateinit var disposes: CompositeDisposable
+    private val viewModel: HomeFragmentViewModel by activityViewModels()
     private var offset = 0
     private var isLastItems = false
     private var viewVisible = false
@@ -51,7 +55,6 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(layoutInflater,container,false)
-        viewModel = ViewModelProvider(requireActivity()).get(HomeFragmentViewModel::class.java)
         disposes = CompositeDisposable()
         setUpRefreshing()
         setUpRecyclerView()

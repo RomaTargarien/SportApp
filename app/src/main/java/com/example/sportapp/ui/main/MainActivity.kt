@@ -1,11 +1,13 @@
 package com.example.sportapp.ui.main
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -19,6 +21,7 @@ import com.example.sportapp.ui.auth.AuthActivity
 import com.example.sportapp.ui.main.dialogs.dialogViewModels.EmailVerifyingViewModel
 import com.example.sportapp.ui.main.dialogs.dialogViewModels.PasswordChangeDialogViewModel
 import com.example.sportapp.ui.main.viewModels.*
+import com.example.sportapp.ui.main.viewModels.base.ReauthenticationViewModel
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import org.imaginativeworld.oopsnointernet.callbacks.ConnectionCallback
@@ -28,14 +31,16 @@ import org.imaginativeworld.oopsnointernet.dialogs.signal.NoInternetDialogSignal
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var selectedCategoryViewModel: SelectedCategoryViewModel
-    private lateinit var emailChangeViewModel: EmailChangeViewModel
-    private lateinit var homeViewModel: HomeFragmentViewModel
-    private lateinit var categoriesViewModel: CategoriesViewModel
-    private lateinit var userViewModel: UserFragmentViewModel
-    private lateinit var passwordChangeDialogViewModel: PasswordChangeDialogViewModel
-    private lateinit var emailVerifyingViewModel: EmailVerifyingViewModel
     private lateinit var router: IMainRouter
+    private val homeViewModel: HomeFragmentViewModel by viewModels()
+    private val selectedCategoryViewModel: SelectedCategoryViewModel by viewModels()
+    private val emailChangeViewModel: EmailChangeViewModel by viewModels()
+    private val categoriesViewModel: CategoriesViewModel by viewModels()
+    private val userViewModel: UserFragmentViewModel by  viewModels()
+    private val passwordChangeViewModel: PasswordChangeViewModel by viewModels()
+    //private val reauthenticationViewModel: ReauthenticationViewModel by viewModels()
+    private val passwordChangeDialogViewModel: PasswordChangeDialogViewModel by viewModels()
+    private val emailVerifyingViewModel: EmailVerifyingViewModel by viewModels()
 
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -46,15 +51,6 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         navigationBarColor()
         noInternetChecking()
-
-        //ViewModelInitializing
-        selectedCategoryViewModel = ViewModelProvider(this).get(SelectedCategoryViewModel::class.java)
-        homeViewModel = ViewModelProvider(this).get(HomeFragmentViewModel::class.java)
-        categoriesViewModel = ViewModelProvider(this).get(CategoriesViewModel::class.java)
-        userViewModel = ViewModelProvider(this).get(UserFragmentViewModel::class.java)
-        passwordChangeDialogViewModel = ViewModelProvider(this).get(PasswordChangeDialogViewModel::class.java)
-        emailVerifyingViewModel = ViewModelProvider(this).get(EmailVerifyingViewModel::class.java)
-        emailChangeViewModel = ViewModelProvider(this).get(EmailChangeViewModel::class.java)
 
         router = MainRouter(this,binding,homeViewModel)
 
@@ -71,24 +67,35 @@ class MainActivity : AppCompatActivity() {
         selectedCategoryViewModel.goToSelectedItemScreen.subscribe({
             router.fromSelectedCategoryScreenToItemScreen(it)
         },{})
+
         emailVerifyingViewModel.verifyingWasSent.subscribe({
             router.logOut()
         },{})
-
         passwordChangeDialogViewModel.passwordHasChanged.subscribe({
             router.logOut()
         },{})
-        emailChangeViewModel.goToLoginScreen.subscribe({
-            router.logOut()
+
+        passwordChangeViewModel.goToUserScreen.subscribe({
+           router.fromChangePasswordScreenToUserScreen()
+            userViewModel.reauthenticationMessage.onNext(it)
         },{})
+        emailChangeViewModel.goToUserScreen.subscribe({
+            router.fromChangeEmailScreenToUserScreen()
+            userViewModel.reauthenticationMessage.onNext(it)
+        },{})
+
         userViewModel.logOut.subscribe({
             router.logOut()
         },{})
         binding.tvLogOut.setOnClickListener {
             router.logOut()
         }
+
         userViewModel.goToChangeEmailScreen.subscribe({
             router.fromUserScreenToChangeEmailScreen()
+        },{})
+        userViewModel.goToChangePasswordScreen.subscribe({
+            router.fromUserScreenToChangePasswordScreen()
         },{})
         binding.ibPerson.setOnClickListener {
             router.goToUserScreen()
@@ -144,5 +151,11 @@ class MainActivity : AppCompatActivity() {
                 showAirplaneModeOffButtons = true // Optional
             }
         }.build()
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun onBackPressed() {
+        super.onBackPressed()
+        Log.d("TAG",findNavController(R.id.navHostFragmentMain).backStack.toString())
     }
 }

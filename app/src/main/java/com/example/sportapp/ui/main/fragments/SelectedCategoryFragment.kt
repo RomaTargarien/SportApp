@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +23,7 @@ import com.example.sportapp.other.ext.convertToRssQuery
 import com.example.sportapp.other.snackbar
 import com.example.sportapp.other.states.DbState
 import com.example.sportapp.other.states.ListState
+import com.example.sportapp.ui.main.viewModels.HomeFragmentViewModel
 import com.example.sportapp.ui.main.viewModels.SelectedCategoryViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -32,7 +34,7 @@ class SelectedCategoryFragment : Fragment() {
 
     val args: SelectedCategoryFragmentArgs by navArgs()
     private lateinit var binding: FragmentSelectedCategoryBinding
-    private lateinit var viewModel: SelectedCategoryViewModel
+    private val viewModel: SelectedCategoryViewModel by activityViewModels()
     private lateinit var materialsAdapter: MaterialsAdapter
     private lateinit var disposes: CompositeDisposable
     private var offset = 0
@@ -56,7 +58,6 @@ class SelectedCategoryFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentSelectedCategoryBinding.inflate(layoutInflater,container,false)
-        viewModel = ViewModelProvider(requireActivity()).get(SelectedCategoryViewModel::class.java)
         disposes = CompositeDisposable()
         setUpRefreshing()
         setUpRecyclerView()

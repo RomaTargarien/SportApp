@@ -10,8 +10,10 @@ import com.example.sportapp.models.rss.materials.Rss
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -23,11 +25,12 @@ import java.lang.Exception
 import javax.inject.Inject
 import kotlin.concurrent.timerTask
 
-class DefaultMainRepository @Inject constructor(private val dao: NewsDao,private val materialsApi: MaterialsApi): MainApiRepository {
-
-    val users = FirebaseFirestore.getInstance().collection("users")
-    val auth = FirebaseAuth.getInstance()
-    private val storage = Firebase.storage
+class DefaultMainRepository @Inject constructor(
+    private val dao: NewsDao,
+    private val materialsApi: MaterialsApi,
+    private val users: CollectionReference,
+    private val auth: FirebaseAuth,
+    private val storage: FirebaseStorage): MainApiRepository {
 
     override fun getApiMaterials(rssQuery: String): Single<Rss> {
         return Single.create { emiter ->
@@ -181,6 +184,23 @@ class DefaultMainRepository @Inject constructor(private val dao: NewsDao,private
                 }
             }
                 .addOnFailureListener {
+                    emiter.onError(it)
+                }
+        }
+    }
+
+    override fun updatePassword(password: String): Observable<Unit> {
+        return Observable.create { emiter ->
+            auth.currentUser?.updatePassword(password)
+                ?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    emiter.onNext(Unit)
+                }
+                else {
+                    emiter.onError(Exception(""))
+                }
+            }
+                ?.addOnFailureListener {
                     emiter.onError(it)
                 }
         }

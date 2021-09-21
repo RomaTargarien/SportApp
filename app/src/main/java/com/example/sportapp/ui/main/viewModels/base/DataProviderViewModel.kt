@@ -1,8 +1,6 @@
-package com.example.sportapp.ui.main.viewModels
+package com.example.sportapp.ui.main.viewModels.base
 
 import android.content.Context
-import android.util.Log
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import com.example.sportapp.R
 import com.example.sportapp.models.rss.materials.Item

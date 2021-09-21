@@ -39,6 +39,13 @@
             app:popExitAnim="@anim/slide_to_bottom"
             app:popEnterAnim="@anim/slide_from_top"
             app:exitAnim="@anim/slide_to_top"/>
+        <action
+            android:id="@+id/action_userFragment_to_passwordChangeFragmnet"
+            app:destination="@id/passwordChangeFragmnet"
+            app:enterAnim="@anim/slide_from_bottom"
+            app:popExitAnim="@anim/slide_to_bottom"
+            app:popEnterAnim="@anim/slide_from_top"
+            app:exitAnim="@anim/slide_to_top"/>
     </fragment>
 
     <fragment
@@ -78,9 +85,18 @@
         <action
             android:id="@+id/action_emailChangeFragment_to_userFragment"
             app:destination="@id/userFragment"
-            app:enterAnim="@anim/slide_to_top"
-            app:popEnterAnim="@anim/slide_to_top"
-            app:exitAnim="@anim/slide_from_bottom"
-            app:popExitAnim="@anim/slide_from_bottom"/>
+            app:enterAnim="@anim/slide_from_top"
+            app:exitAnim="@anim/slide_to_bottom"/>
+    </fragment>
+    <fragment
+        android:id="@+id/passwordChangeFragmnet"
+        android:name="com.example.sportapp.ui.main.fragments.PasswordChangeFragmnet"
+        android:label="fragment_password_change"
+        tools:layout="@layout/fragment_password_change" >
+        <action
+            android:id="@+id/action_passwordChangeFragmnet_to_userFragment"
+            app:destination="@id/userFragment"
+            app:enterAnim="@anim/slide_from_top"
+            app:exitAnim="@anim/slide_to_bottom" />
     </fragment>
 </navigation>

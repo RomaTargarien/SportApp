@@ -1,8 +1,8 @@
 package com.example.sportapp.ui.main
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -11,9 +11,10 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.sportapp.R
 import com.example.sportapp.databinding.ActivityMainBinding
 import com.example.sportapp.ui.auth.AuthActivity
-import com.example.sportapp.ui.main.viewModels.DataProviderViewModel
+import com.example.sportapp.ui.main.viewModels.base.DataProviderViewModel
 import com.google.firebase.auth.FirebaseAuth
 
+@SuppressLint("RestrictedApi")
 class MainRouter(
     val mainActivity: AppCompatActivity,
     val binding: ActivityMainBinding,
@@ -59,6 +60,18 @@ class MainRouter(
 
     override fun fromUserScreenToChangeEmailScreen() {
         mainActivity.findNavController(R.id.navHostFragmentMain).navigate(R.id.action_userFragment_to_emailChangeFragment)
+    }
+
+    override fun fromUserScreenToChangePasswordScreen() {
+        mainActivity.findNavController(R.id.navHostFragmentMain).navigate(R.id.action_userFragment_to_passwordChangeFragmnet)
+    }
+
+    override fun fromChangeEmailScreenToUserScreen() {
+        mainActivity.findNavController(R.id.navHostFragmentMain).navigate(R.id.action_emailChangeFragment_to_userFragment)
+    }
+
+    override fun fromChangePasswordScreenToUserScreen() {
+        mainActivity.findNavController(R.id.navHostFragmentMain).navigate(R.id.action_passwordChangeFragmnet_to_userFragment)
     }
 
     override fun logOut() {

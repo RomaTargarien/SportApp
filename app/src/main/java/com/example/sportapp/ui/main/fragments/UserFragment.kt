@@ -32,27 +32,37 @@ import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
+import com.example.sportapp.other.snackbar
+import com.example.sportapp.ui.main.viewModels.SelectedCategoryViewModel
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class UserFragmemt : Fragment() {
 
     private lateinit var binding: FragmentUserBinding
-    private lateinit var viewModel: UserFragmentViewModel
+    private val viewModel: UserFragmentViewModel by activityViewModels()
     private lateinit var categoriesUserAdapter: HomeCategoriesAdapter
-    private val auth = FirebaseAuth.getInstance()
     private lateinit var disposes: CompositeDisposable
+
+    @Inject
+    lateinit var auth: FirebaseAuth
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.layoutChangeEmail.setOnClickListener {
             viewModel.goToChangeEmailScreen.onNext(Unit)
+        }
+        binding.layoutChangePassword.setOnClickListener {
+            viewModel.goToChangePasswordScreen.onNext(Unit)
         }
     }
 
@@ -70,9 +80,9 @@ class UserFragmemt : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentUserBinding.inflate(inflater,container,false)
-        viewModel = ViewModelProvider(requireActivity()).get(UserFragmentViewModel::class.java)
         disposes = CompositeDisposable()
         setUpRecyclerView()
+
 
         binding.ivEmailVerified.setImageResource(
             if (auth.currentUser!!.isEmailVerified) R.drawable.check
@@ -84,9 +94,7 @@ class UserFragmemt : Fragment() {
         }
 
         binding.layoutChangePassword.setOnClickListener {
-            val passwordChangeDialog = PasswordChangeDialog()
-            val manager = parentFragmentManager
-            passwordChangeDialog.show(manager,"Dialog")
+
         }
 
         binding.layoutVerifyEmail.setOnClickListener {
@@ -99,7 +107,10 @@ class UserFragmemt : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        Log.d("TAG","onResume")
         viewModel.isLogOutShown.onNext(true)
+
+        Log.d("TAG","onResume" + FirebaseAuth.getInstance().currentUser!!.isEmailVerified.toString())
 
         disposes.add(viewModel.userRealtimeUdaptes.observeOn(AndroidSchedulers.mainThread()).subscribe({
             binding.tvUserName.text = it.username
@@ -111,6 +122,11 @@ class UserFragmemt : Fragment() {
             binding.imageProgressBar.isVisible = it
             binding.userProfileImage.alpha = if (it) 0.7f else 1.0f
         },{}))
+
+        viewModel.reauthenticationMessage.subscribe({
+            Log.d("TAG",it)
+            snackbar(it,true)
+        },{})
     }
 
     override fun onPause() {

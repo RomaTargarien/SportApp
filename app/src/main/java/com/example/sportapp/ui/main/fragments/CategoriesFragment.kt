@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -21,6 +22,7 @@ import com.example.sportapp.other.ext.getListOfTittles
 import com.example.sportapp.other.snackbar
 import com.example.sportapp.other.states.Resource
 import com.example.sportapp.ui.main.viewModels.CategoriesViewModel
+import com.example.sportapp.ui.main.viewModels.EmailChangeViewModel
 import com.example.sportapp.ui.main.viewModels.HomeFragmentViewModel
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,14 +35,13 @@ class CategoriesFragment : Fragment() {
     private lateinit var binding: FragmentCategoriesBinding
     private lateinit var categoriesAdapter: CategoriesAdapter
     private lateinit var disposes: CompositeDisposable
-    private lateinit var viewModel: CategoriesViewModel
+    private val viewModel: CategoriesViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentCategoriesBinding.inflate(inflater,container,false)
-        viewModel = ViewModelProvider(requireActivity()).get(CategoriesViewModel::class.java)
         disposes = CompositeDisposable()
         setUpRecyclerView()
 

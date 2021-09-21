@@ -25,8 +25,10 @@ class UserFragmentViewModel @ViewModelInject constructor(
     val updateUserProfileImage = PublishSubject.create<Uri>()
 
     val goToChangeEmailScreen = PublishSubject.create<Unit>()
+    val goToChangePasswordScreen = PublishSubject.create<Unit>()
 
     val isProgressBarVisible = BehaviorSubject.createDefault(false)
+    val reauthenticationMessage = PublishSubject.create<String>()
 
     init {
 

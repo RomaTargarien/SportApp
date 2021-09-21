@@ -4,16 +4,8 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.example.sportapp.db.NewsDao
-import com.example.sportapp.models.rss.materials.Item
-import com.example.sportapp.other.Constants.LIMIT
-import com.example.sportapp.other.Constants.OFFSET
-import com.example.sportapp.other.states.DbState
-import com.example.sportapp.other.states.ListState
-import com.example.sportapp.repositories.main.DefaultMainRepository
 import com.example.sportapp.repositories.main.MainApiRepository
+import com.example.sportapp.ui.main.viewModels.base.DataProviderViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
@@ -32,7 +24,7 @@ class HomeFragmentViewModel @ViewModelInject constructor(
    val goToSelectedItemScreen = PublishSubject.create<Bundle>()
 
    init {
-
+      Log.d("TAG","init homeViewModel")
       updateLikedCategories.observeOn(Schedulers.io())
          .map {
             val list = mutableListOf<String>()

@@ -14,24 +14,22 @@ import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 
-class EmailChangeViewModel @ViewModelInject constructor(
+class PasswordChangeViewModel @ViewModelInject constructor(
     mainApiRepository: MainApiRepository,
     private val applicationContext: Context
-): ReauthenticationViewModel(mainApiRepository, applicationContext) {
+): ReauthenticationViewModel(mainApiRepository,applicationContext) {
 
-
-    val emailChahge = PublishSubject.create<Unit>()
-    val emailChangingState = PublishSubject.create<Resource<String>>()
-
-    val _newEmail = BehaviorSubject.create<String>()
-    val newEmail = BehaviorSubject.create<Resource<String>>()
+    val _newPassword = BehaviorSubject.create<String>()
+    val newPassword = BehaviorSubject.create<Resource<String>>()
     val tvEndEnabled = BehaviorSubject.createDefault(false)
+
+    val passwordChahge = PublishSubject.create<Unit>()
+    val passwordChangingState = PublishSubject.create<Resource<String>>()
 
 
 
     init {
-
-        val newEmailSubject = _newEmail
+        val newPasswordSubject = _newPassword
             .distinctUntilChanged()
             .doOnNext {
                 tvEndEnabled.onNext(false)
@@ -39,37 +37,37 @@ class EmailChangeViewModel @ViewModelInject constructor(
             .debounce(1000,TimeUnit.MILLISECONDS)
             .observeOn(Schedulers.io())
             .map {
-                Pair(it,it.validateEmail(applicationContext))
+                Pair(it,it.validatePassword(applicationContext))
             }
             .observeOn(AndroidSchedulers.mainThread())
             .cacheWithInitialCapacity(1)
 
-        newEmailSubject.subscribe({
-           newEmail.onNext(it.second)
+        newPasswordSubject.subscribe({
+            newPassword.onNext(it.second)
         },{})
 
-        newEmailSubject.subscribe({
+        newPasswordSubject.subscribe({
             tvEndEnabled.onNext(it.second is Resource.Success)
         },{})
 
-        emailChahge
-            .withLatestFrom(newEmailSubject) {_,email -> email.first}
+        passwordChahge
+            .withLatestFrom(newPasswordSubject) {_,password -> password.first}
             .doOnNext {
                 isProgressBarVisible.onNext(true)
             }
             .observeOn(Schedulers.io())
             .switchMap {
-                mainApiRepository.updateEmail(it)
+                mainApiRepository.updatePassword(it)
             }
             .observeOn(AndroidSchedulers.mainThread())
             .doOnError {
                 isProgressBarVisible.onNext(false)
-                emailChangingState.onNext(Resource.Error(it.localizedMessage))
+                passwordChangingState.onNext(Resource.Error(it.localizedMessage))
             }
             .retry()
             .subscribe({
                 isProgressBarVisible.onNext(false)
-                emailChangingState.onNext(Resource.Success("Логин успешно изменен"))
+                passwordChangingState.onNext(Resource.Success("Пароль успешно изменен"))
             },{})
     }
 }

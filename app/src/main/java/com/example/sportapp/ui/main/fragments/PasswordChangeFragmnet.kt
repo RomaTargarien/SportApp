@@ -1,34 +1,36 @@
 package com.example.sportapp.ui.main.fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
-import com.example.sportapp.databinding.FragmentEmailChangeBinding
+import com.example.sportapp.R
+import com.example.sportapp.databinding.FragmentPasswordChangeBinding
 import com.example.sportapp.other.snackbar
 import com.example.sportapp.other.states.Resource
 import com.example.sportapp.other.textInputBehavior
-import com.example.sportapp.ui.main.viewModels.EmailChangeViewModel
-import com.example.sportapp.ui.main.viewModels.HomeFragmentViewModel
+import com.example.sportapp.ui.main.viewModels.PasswordChangeViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import render.animations.Attention
 import render.animations.Render
 import render.animations.Slide
 
+@AndroidEntryPoint
+class PasswordChangeFragmnet : Fragment() {
 
-class EmailChangeFragment : Fragment() {
-
-    private lateinit var binding: FragmentEmailChangeBinding
-    private lateinit var emailDispose: CompositeDisposable
-    private lateinit var passwordDispose: CompositeDisposable
+    private lateinit var binding: FragmentPasswordChangeBinding
+    private val viewModel: PasswordChangeViewModel by activityViewModels()
+    private lateinit var oldPasswordDispose: CompositeDisposable
+    private lateinit var newpasswordDispose: CompositeDisposable
     private lateinit var disposes: CompositeDisposable
     private lateinit var render: Render
-    private val viewModel: EmailChangeViewModel by activityViewModels()
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -38,7 +40,7 @@ class EmailChangeFragment : Fragment() {
         }
 
         binding.tvEnd.setOnClickListener {
-            viewModel.emailChahge.onNext(Unit)
+            viewModel.passwordChahge.onNext(Unit)
         }
     }
 
@@ -46,7 +48,7 @@ class EmailChangeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentEmailChangeBinding.inflate(inflater,container,false)
+        binding = FragmentPasswordChangeBinding.inflate(layoutInflater,container,false)
         disposes = CompositeDisposable()
         render = Render(requireContext())
         return binding.root
@@ -56,16 +58,16 @@ class EmailChangeFragment : Fragment() {
         super.onResume()
 
         val outLeftList = listOf<View>(binding.tvNext,binding.textPassword,binding.textInputConfirmPassword)
-        val inRightList = listOf<View>(binding.tvEnd,binding.textEmail,binding.textInputNewEmail)
+        val inRightList = listOf<View>(binding.tvEnd,binding.textNewPassword,binding.textInputNewPassword)
 
         //editText password
-        passwordDispose = binding.textInputNewEmail.textInputBehavior(
-            subjectInput = viewModel._newEmail,
-            subjectOutput = viewModel.newEmail
+        newpasswordDispose = binding.textInputNewPassword.textInputBehavior(
+            subjectInput = viewModel._newPassword,
+            subjectOutput = viewModel.newPassword
         )
 
         //editText email
-        emailDispose = binding.textInputConfirmPassword.textInputBehavior(
+        oldPasswordDispose = binding.textInputConfirmPassword.textInputBehavior(
             subjectInput = viewModel._password,
             subjectOutput = viewModel.password
         )
@@ -103,13 +105,14 @@ class EmailChangeFragment : Fragment() {
         },{}))
 
         //emailChanging State
-        disposes.add(viewModel.emailChangingState.observeOn(AndroidSchedulers.mainThread()).subscribe({
+        disposes.add(viewModel.passwordChangingState.observeOn(AndroidSchedulers.mainThread()).subscribe({
             when (it) {
                 is Resource.Success -> {
+                    Log.d("TAG","Success")
                     viewModel.goToUserScreen.onNext(it.data)
                 }
                 is Resource.Error -> {
-                    shake(binding.textInputNewEmail)
+                    shake(binding.textInputNewPassword)
                     it.message?.let {
                         snackbar(it)
                     }
