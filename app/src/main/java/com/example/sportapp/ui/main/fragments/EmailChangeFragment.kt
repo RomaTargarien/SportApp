@@ -102,19 +102,9 @@ class EmailChangeFragment : Fragment() {
             }
         },{}))
 
-        //emailChanging State
-        disposes.add(viewModel.emailChangingState.observeOn(AndroidSchedulers.mainThread()).subscribe({
-            when (it) {
-                is Resource.Success -> {
-                    viewModel.goToUserScreen.onNext(it.data)
-                }
-                is Resource.Error -> {
-                    shake(binding.textInputNewEmail)
-                    it.message?.let {
-                        snackbar(it)
-                    }
-                }
-            }
+        disposes.add(viewModel.errorMessage.subscribe({
+            shake(binding.textInputNewEmail)
+            snackbar(it)
         },{}))
     }
 

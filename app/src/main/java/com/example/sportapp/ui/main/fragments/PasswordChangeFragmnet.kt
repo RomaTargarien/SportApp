@@ -104,20 +104,9 @@ class PasswordChangeFragmnet : Fragment() {
             }
         },{}))
 
-        //emailChanging State
-        disposes.add(viewModel.passwordChangingState.observeOn(AndroidSchedulers.mainThread()).subscribe({
-            when (it) {
-                is Resource.Success -> {
-                    Log.d("TAG","Success")
-                    viewModel.goToUserScreen.onNext(it.data)
-                }
-                is Resource.Error -> {
-                    shake(binding.textInputNewPassword)
-                    it.message?.let {
-                        snackbar(it)
-                    }
-                }
-            }
+        disposes.add(viewModel.errorMessage.subscribe({
+            shake(binding.textInputNewPassword)
+            snackbar(it)
         },{}))
     }
 

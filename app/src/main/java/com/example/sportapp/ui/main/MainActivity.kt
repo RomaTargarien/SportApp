@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity() {
     private val categoriesViewModel: CategoriesViewModel by viewModels()
     private val userViewModel: UserFragmentViewModel by  viewModels()
     private val passwordChangeViewModel: PasswordChangeViewModel by viewModels()
-    //private val reauthenticationViewModel: ReauthenticationViewModel by viewModels()
     private val passwordChangeDialogViewModel: PasswordChangeDialogViewModel by viewModels()
     private val emailVerifyingViewModel: EmailVerifyingViewModel by viewModels()
 
@@ -76,12 +75,12 @@ class MainActivity : AppCompatActivity() {
         },{})
 
         passwordChangeViewModel.goToUserScreen.subscribe({
-           router.fromChangePasswordScreenToUserScreen()
-            userViewModel.reauthenticationMessage.onNext(it)
+            val bundle = Bundle().apply { putString("message",it) }
+            router.fromChangePasswordScreenToUserScreen(bundle)
         },{})
         emailChangeViewModel.goToUserScreen.subscribe({
-            router.fromChangeEmailScreenToUserScreen()
-            userViewModel.reauthenticationMessage.onNext(it)
+            val bundle = Bundle().apply { putString("message",it) }
+            router.fromChangeEmailScreenToUserScreen(bundle)
         },{})
 
         userViewModel.logOut.subscribe({

@@ -33,6 +33,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.example.sportapp.other.snackbar
 import com.example.sportapp.ui.main.viewModels.SelectedCategoryViewModel
@@ -50,9 +51,10 @@ class UserFragmemt : Fragment() {
     private val viewModel: UserFragmentViewModel by activityViewModels()
     private lateinit var categoriesUserAdapter: HomeCategoriesAdapter
     private lateinit var disposes: CompositeDisposable
+    private lateinit var auth: FirebaseAuth
+    private lateinit var message: String
+    val args: UserFragmemtArgs by navArgs()
 
-    @Inject
-    lateinit var auth: FirebaseAuth
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -63,6 +65,11 @@ class UserFragmemt : Fragment() {
         }
         binding.layoutChangePassword.setOnClickListener {
             viewModel.goToChangePasswordScreen.onNext(Unit)
+        }
+        message = args.message
+        Log.d("TAG","message = $message")
+        if (!message.isEmpty()) {
+            snackbar(message,true)
         }
     }
 
@@ -81,7 +88,10 @@ class UserFragmemt : Fragment() {
     ): View {
         binding = FragmentUserBinding.inflate(inflater,container,false)
         disposes = CompositeDisposable()
+        auth = FirebaseAuth.getInstance()
+
         setUpRecyclerView()
+
 
 
         binding.ivEmailVerified.setImageResource(
@@ -110,7 +120,6 @@ class UserFragmemt : Fragment() {
         Log.d("TAG","onResume")
         viewModel.isLogOutShown.onNext(true)
 
-        Log.d("TAG","onResume" + FirebaseAuth.getInstance().currentUser!!.isEmailVerified.toString())
 
         disposes.add(viewModel.userRealtimeUdaptes.observeOn(AndroidSchedulers.mainThread()).subscribe({
             binding.tvUserName.text = it.username
@@ -123,16 +132,20 @@ class UserFragmemt : Fragment() {
             binding.userProfileImage.alpha = if (it) 0.7f else 1.0f
         },{}))
 
-        viewModel.reauthenticationMessage.subscribe({
-            Log.d("TAG",it)
-            snackbar(it,true)
-        },{})
+
     }
 
     override fun onPause() {
         super.onPause()
+        Log.d("TAG","onPause")
+        message = ""
         disposes.clear()
         viewModel.isLogOutShown.onNext(false)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("TAG","onStop")
     }
 
     private fun setUpRecyclerView() {

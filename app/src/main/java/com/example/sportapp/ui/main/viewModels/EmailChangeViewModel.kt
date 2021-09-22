@@ -21,7 +21,7 @@ class EmailChangeViewModel @ViewModelInject constructor(
 
 
     val emailChahge = PublishSubject.create<Unit>()
-    val emailChangingState = PublishSubject.create<Resource<String>>()
+    val errorMessage = BehaviorSubject.create<String>()
 
     val _newEmail = BehaviorSubject.create<String>()
     val newEmail = BehaviorSubject.create<Resource<String>>()
@@ -64,12 +64,12 @@ class EmailChangeViewModel @ViewModelInject constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnError {
                 isProgressBarVisible.onNext(false)
-                emailChangingState.onNext(Resource.Error(it.localizedMessage))
+                errorMessage.onNext(it.localizedMessage)
             }
             .retry()
             .subscribe({
                 isProgressBarVisible.onNext(false)
-                emailChangingState.onNext(Resource.Success("Логин успешно изменен"))
+                goToUserScreen.onNext("Логин успешно изменен")
             },{})
     }
 }

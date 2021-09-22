@@ -24,9 +24,7 @@ class PasswordChangeViewModel @ViewModelInject constructor(
     val tvEndEnabled = BehaviorSubject.createDefault(false)
 
     val passwordChahge = PublishSubject.create<Unit>()
-    val passwordChangingState = PublishSubject.create<Resource<String>>()
-
-
+    val errorMessage = BehaviorSubject.create<String>()
 
     init {
         val newPasswordSubject = _newPassword
@@ -62,12 +60,12 @@ class PasswordChangeViewModel @ViewModelInject constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnError {
                 isProgressBarVisible.onNext(false)
-                passwordChangingState.onNext(Resource.Error(it.localizedMessage))
+                errorMessage.onNext(it.localizedMessage)
             }
             .retry()
             .subscribe({
                 isProgressBarVisible.onNext(false)
-                passwordChangingState.onNext(Resource.Success("Пароль успешно изменен"))
+                goToUserScreen.onNext("Пароль успешно изменен")
             },{})
     }
 }
