@@ -206,6 +206,19 @@ class DefaultMainRepository @Inject constructor(
         }
     }
 
+    override fun reloadUserInfo(): Observable<Unit> {
+        return Observable.create { emiter ->
+            auth.currentUser?.reload()?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    emiter.onNext(Unit)
+                }
+            }
+                ?.addOnFailureListener {
+                    emiter.onError(it)
+                }
+        }
+    }
+
 
 
     override fun changePassword(): Observable<Unit> {

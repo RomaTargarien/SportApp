@@ -1,8 +1,11 @@
 package com.example.sportapp.ui.main.viewModels
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
+import com.example.sportapp.R
+import com.example.sportapp.other.states.LoadingScreenState
 import com.example.sportapp.other.states.Resource
 import com.example.sportapp.other.validateEmail
 import com.example.sportapp.other.validatePassword
@@ -24,7 +27,10 @@ class PasswordChangeViewModel @ViewModelInject constructor(
     val tvEndEnabled = BehaviorSubject.createDefault(false)
 
     val passwordChahge = PublishSubject.create<Unit>()
-    val errorMessage = BehaviorSubject.create<String>()
+
+    val snackBarMessage = BehaviorSubject.create<String>()
+
+    val lottieResult = BehaviorSubject.create<Boolean>()
 
     init {
         val newPasswordSubject = _newPassword
@@ -50,22 +56,25 @@ class PasswordChangeViewModel @ViewModelInject constructor(
 
         passwordChahge
             .withLatestFrom(newPasswordSubject) {_,password -> password.first}
-            .doOnNext {
-                isProgressBarVisible.onNext(true)
-            }
             .observeOn(Schedulers.io())
             .switchMap {
                 mainApiRepository.updatePassword(it)
             }
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnError {
-                isProgressBarVisible.onNext(false)
-                errorMessage.onNext(it.localizedMessage)
+            .doOnNext {
+                lottieResult.onNext(true)
             }
-            .retry()
-            .subscribe({
-                isProgressBarVisible.onNext(false)
-                goToUserScreen.onNext("Пароль успешно изменен")
-            },{})
+            .doOnError {
+            }
+            .subscribe()
+
+        lottieResult
+            .delay(3000,TimeUnit.MILLISECONDS)
+            .doOnNext {
+                if (it) {
+                    goToUserScreen.onNext("")
+                }
+            }
+            .subscribe()
     }
 }

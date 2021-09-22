@@ -8,6 +8,7 @@ import com.example.sportapp.models.User
 import com.example.sportapp.repositories.main.MainApiRepository
 import com.google.firebase.auth.UserProfileChangeRequest
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -28,7 +29,9 @@ class UserFragmentViewModel @ViewModelInject constructor(
     val goToChangePasswordScreen = PublishSubject.create<Unit>()
 
     val isProgressBarVisible = BehaviorSubject.createDefault(false)
-    val reauthenticationMessage = PublishSubject.create<String>()
+
+    val reauthenticationMessage = BehaviorSubject.create<String>()
+    val reathenticate = BehaviorSubject.create<Unit>()
 
     init {
 

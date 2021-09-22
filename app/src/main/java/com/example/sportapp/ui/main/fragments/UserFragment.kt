@@ -52,24 +52,20 @@ class UserFragmemt : Fragment() {
     private lateinit var categoriesUserAdapter: HomeCategoriesAdapter
     private lateinit var disposes: CompositeDisposable
     private lateinit var auth: FirebaseAuth
-    private lateinit var message: String
-    val args: UserFragmemtArgs by navArgs()
 
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("TAG","onViewCreated")
+        viewModel.reathenticate.onNext(Unit)
 
         binding.layoutChangeEmail.setOnClickListener {
             viewModel.goToChangeEmailScreen.onNext(Unit)
         }
         binding.layoutChangePassword.setOnClickListener {
             viewModel.goToChangePasswordScreen.onNext(Unit)
-        }
-        message = args.message
-        Log.d("TAG","message = $message")
-        if (!message.isEmpty()) {
-            snackbar(message,true)
+            Log.d("TAG","Unit")
         }
     }
 
@@ -138,7 +134,6 @@ class UserFragmemt : Fragment() {
     override fun onPause() {
         super.onPause()
         Log.d("TAG","onPause")
-        message = ""
         disposes.clear()
         viewModel.isLogOutShown.onNext(false)
     }

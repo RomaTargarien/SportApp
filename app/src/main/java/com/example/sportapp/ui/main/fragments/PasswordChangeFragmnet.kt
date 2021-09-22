@@ -6,10 +6,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.example.sportapp.R
 import com.example.sportapp.databinding.FragmentPasswordChangeBinding
+import com.example.sportapp.other.progressScreen
 import com.example.sportapp.other.snackbar
 import com.example.sportapp.other.states.Resource
 import com.example.sportapp.other.textInputBehavior
@@ -28,6 +31,7 @@ class PasswordChangeFragmnet : Fragment() {
     private val viewModel: PasswordChangeViewModel by activityViewModels()
     private lateinit var oldPasswordDispose: CompositeDisposable
     private lateinit var newpasswordDispose: CompositeDisposable
+    private lateinit var animation: Animation
     private lateinit var disposes: CompositeDisposable
     private lateinit var render: Render
 
@@ -49,6 +53,7 @@ class PasswordChangeFragmnet : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentPasswordChangeBinding.inflate(layoutInflater,container,false)
+        animation = AnimationUtils.loadAnimation(this.requireContext(),R.anim.anim)
         disposes = CompositeDisposable()
         render = Render(requireContext())
         return binding.root
@@ -104,10 +109,9 @@ class PasswordChangeFragmnet : Fragment() {
             }
         },{}))
 
-        disposes.add(viewModel.errorMessage.subscribe({
-            shake(binding.textInputNewPassword)
-            snackbar(it)
-        },{}))
+//        viewModel.snackBarMessage.subscribe({
+//          snackbar(it,true)
+//        },{})
     }
 
     override fun onPause() {

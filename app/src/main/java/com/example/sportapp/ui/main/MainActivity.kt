@@ -75,12 +75,10 @@ class MainActivity : AppCompatActivity() {
         },{})
 
         passwordChangeViewModel.goToUserScreen.subscribe({
-            val bundle = Bundle().apply { putString("message",it) }
-            router.fromChangePasswordScreenToUserScreen(bundle)
+            router.fromChangePasswordScreenToUserScreen()
         },{})
         emailChangeViewModel.goToUserScreen.subscribe({
-            val bundle = Bundle().apply { putString("message",it) }
-            router.fromChangeEmailScreenToUserScreen(bundle)
+            router.fromChangeEmailScreenToUserScreen()
         },{})
 
         userViewModel.logOut.subscribe({
@@ -91,9 +89,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         userViewModel.goToChangeEmailScreen.subscribe({
+            Log.d("TAG","goToChangeEmailScreen")
             router.fromUserScreenToChangeEmailScreen()
         },{})
         userViewModel.goToChangePasswordScreen.subscribe({
+            Log.d("TAG","goToChangePasswordScreen")
             router.fromUserScreenToChangePasswordScreen()
         },{})
         binding.ibPerson.setOnClickListener {
