@@ -25,4 +25,5 @@ interface MainApiRepository {
     fun reauthenticate(password: String): Observable<Unit>
     fun updateUserProfileImage(imageUri: Uri): Observable<Unit>
     fun updatePassword(password: String): Observable<Unit>
+    fun reloadUserInfo(): Observable<Unit>
 }

@@ -1,6 +1,7 @@
 package com.example.sportapp.other
 
 import android.content.Context
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.ViewGroup
@@ -45,6 +46,7 @@ fun Fragment.progressScreen(
         layoutToDisable.forEachChildView { it.isEnabled = true }
     }
     if (progressScreenBehavior is LoadingScreenState.Success) {
+        Log.d("TAG","play")
         progressScreenViewsVisibility(cardViewVisibility = true,progressBarVisibility = false
             ,errorTextVisibility = true,progressScreenBinding = progressScreenBinding)
         progressScreenBinding.cardError.startAnimation(animation)
