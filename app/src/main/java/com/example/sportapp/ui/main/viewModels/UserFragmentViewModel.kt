@@ -28,7 +28,7 @@ class UserFragmentViewModel @ViewModelInject constructor(
     val goToChangePasswordScreen = PublishSubject.create<Unit>()
 
     val isProgressBarVisible = BehaviorSubject.createDefault(false)
-    val reauthenticationMessage = PublishSubject.create<String>()
+    val reauthenticationMessage = BehaviorSubject.createDefault("")
 
     init {
 
@@ -50,6 +50,7 @@ class UserFragmentViewModel @ViewModelInject constructor(
             .subscribe({
                 userRealtimeUdaptes.onNext(it)
             },{})
+
 
         verifyEmail.observeOn(Schedulers.io())
             .switchMap {

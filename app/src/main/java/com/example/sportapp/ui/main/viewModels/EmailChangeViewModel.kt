@@ -27,8 +27,6 @@ class EmailChangeViewModel @ViewModelInject constructor(
     val newEmail = BehaviorSubject.create<Resource<String>>()
     val tvEndEnabled = BehaviorSubject.createDefault(false)
 
-
-
     init {
 
         val newEmailSubject = _newEmail

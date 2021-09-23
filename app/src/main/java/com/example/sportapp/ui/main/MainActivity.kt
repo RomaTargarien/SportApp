@@ -75,12 +75,13 @@ class MainActivity : AppCompatActivity() {
         },{})
 
         passwordChangeViewModel.goToUserScreen.subscribe({
-            val bundle = Bundle().apply { putString("message",it) }
-            router.fromChangePasswordScreenToUserScreen(bundle)
+            userViewModel.reauthenticationMessage.onNext(it)
+            router.fromChangePasswordScreenToUserScreen()
+
         },{})
         emailChangeViewModel.goToUserScreen.subscribe({
-            val bundle = Bundle().apply { putString("message",it) }
-            router.fromChangeEmailScreenToUserScreen(bundle)
+            userViewModel.reauthenticationMessage.onNext(it)
+            router.fromChangeEmailScreenToUserScreen()
         },{})
 
         userViewModel.logOut.subscribe({

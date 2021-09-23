@@ -66,12 +66,12 @@ class MainRouter(
         mainActivity.findNavController(R.id.navHostFragmentMain).navigate(R.id.action_userFragment_to_passwordChangeFragmnet)
     }
 
-    override fun fromChangeEmailScreenToUserScreen(bundle: Bundle) {
-        mainActivity.findNavController(R.id.navHostFragmentMain).navigate(R.id.action_emailChangeFragment_to_userFragment,bundle)
+    override fun fromChangeEmailScreenToUserScreen() {
+        mainActivity.findNavController(R.id.navHostFragmentMain).navigate(R.id.action_emailChangeFragment_to_userFragment)
     }
 
-    override fun fromChangePasswordScreenToUserScreen(bundle: Bundle) {
-        mainActivity.findNavController(R.id.navHostFragmentMain).navigate(R.id.action_passwordChangeFragmnet_to_userFragment,bundle)
+    override fun fromChangePasswordScreenToUserScreen() {
+        mainActivity.findNavController(R.id.navHostFragmentMain).navigate(R.id.action_passwordChangeFragmnet_to_userFragment)
     }
 
     override fun logOut() {

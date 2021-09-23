@@ -104,6 +104,7 @@ class PasswordChangeFragmnet : Fragment() {
             }
         },{}))
 
+        //Error changing password
         disposes.add(viewModel.errorMessage.subscribe({
             shake(binding.textInputNewPassword)
             snackbar(it)

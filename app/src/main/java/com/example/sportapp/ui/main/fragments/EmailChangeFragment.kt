@@ -102,6 +102,7 @@ class EmailChangeFragment : Fragment() {
             }
         },{}))
 
+        //Error email changing
         disposes.add(viewModel.errorMessage.subscribe({
             shake(binding.textInputNewEmail)
             snackbar(it)

@@ -52,8 +52,6 @@ class UserFragmemt : Fragment() {
     private lateinit var categoriesUserAdapter: HomeCategoriesAdapter
     private lateinit var disposes: CompositeDisposable
     private lateinit var auth: FirebaseAuth
-    private lateinit var message: String
-    val args: UserFragmemtArgs by navArgs()
 
 
 
@@ -66,11 +64,12 @@ class UserFragmemt : Fragment() {
         binding.layoutChangePassword.setOnClickListener {
             viewModel.goToChangePasswordScreen.onNext(Unit)
         }
-        message = args.message
-        Log.d("TAG","message = $message")
-        if (!message.isEmpty()) {
-            snackbar(message,true)
+        viewModel.reauthenticationMessage.value.apply {
+            if (this.isNotEmpty()) {
+                snackbar(this,true)
+            }
         }
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,10 +88,7 @@ class UserFragmemt : Fragment() {
         binding = FragmentUserBinding.inflate(inflater,container,false)
         disposes = CompositeDisposable()
         auth = FirebaseAuth.getInstance()
-
         setUpRecyclerView()
-
-
 
         binding.ivEmailVerified.setImageResource(
             if (auth.currentUser!!.isEmailVerified) R.drawable.check
@@ -120,7 +116,6 @@ class UserFragmemt : Fragment() {
         Log.d("TAG","onResume")
         viewModel.isLogOutShown.onNext(true)
 
-
         disposes.add(viewModel.userRealtimeUdaptes.observeOn(AndroidSchedulers.mainThread()).subscribe({
             binding.tvUserName.text = it.username
             Glide.with(requireContext()).load(Uri.parse(it.userProfileImageUri)).into(binding.userProfileImage)
@@ -137,15 +132,13 @@ class UserFragmemt : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        Log.d("TAG","onPause")
-        message = ""
         disposes.clear()
+        viewModel.reauthenticationMessage.onNext("")
         viewModel.isLogOutShown.onNext(false)
     }
 
     override fun onStop() {
         super.onStop()
-        Log.d("TAG","onStop")
     }
 
     private fun setUpRecyclerView() {
