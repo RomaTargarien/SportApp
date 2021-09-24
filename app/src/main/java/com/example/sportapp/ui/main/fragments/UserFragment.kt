@@ -58,6 +58,10 @@ class UserFragmemt : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (!(auth.currentUser!!.isEmailVerified)) {
+            viewModel.reloadUser.onNext(Unit)
+        }
+
         binding.layoutChangeEmail.setOnClickListener {
             viewModel.goToChangeEmailScreen.onNext(Unit)
         }

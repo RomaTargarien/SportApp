@@ -67,11 +67,14 @@ class MainRouter(
     }
 
     override fun fromChangeEmailScreenToUserScreen() {
+        mainActivity.findNavController(R.id.navHostFragmentMain).popBackStack()
         mainActivity.findNavController(R.id.navHostFragmentMain).navigate(R.id.action_emailChangeFragment_to_userFragment)
     }
 
     override fun fromChangePasswordScreenToUserScreen() {
+        mainActivity.findNavController(R.id.navHostFragmentMain).popBackStack()
         mainActivity.findNavController(R.id.navHostFragmentMain).navigate(R.id.action_passwordChangeFragmnet_to_userFragment)
+
     }
 
     override fun logOut() {

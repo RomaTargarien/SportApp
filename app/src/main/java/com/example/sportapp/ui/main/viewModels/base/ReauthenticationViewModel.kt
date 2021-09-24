@@ -67,6 +67,7 @@ abstract class ReauthenticationViewModel(
             .retry()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
+                _password.onNext("")
                 isProgressBarVisible.onNext(false)
                 reauthenticationState.onNext(Resource.Success(""))
             },{})

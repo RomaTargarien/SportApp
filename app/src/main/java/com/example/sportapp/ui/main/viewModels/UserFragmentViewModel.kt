@@ -11,6 +11,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
+import java.util.concurrent.TimeUnit
 
 class UserFragmentViewModel @ViewModelInject constructor(
     mainApiRepository: MainApiRepository
@@ -29,6 +30,8 @@ class UserFragmentViewModel @ViewModelInject constructor(
 
     val isProgressBarVisible = BehaviorSubject.createDefault(false)
     val reauthenticationMessage = BehaviorSubject.createDefault("")
+
+    val reloadUser = PublishSubject.create<Unit>()
 
     init {
 
@@ -64,5 +67,20 @@ class UserFragmentViewModel @ViewModelInject constructor(
             .subscribe({
                 Log.d("TAG","Email sent")
             },{})
+
+        reloadUser
+            .debounce(2000,TimeUnit.MILLISECONDS)
+            .observeOn(Schedulers.io())
+            .switchMap {
+                mainApiRepository.reloadUser()
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnError {
+               Log.d("TAG","error")
+            }
+            .subscribe({
+                Log.d("TAG","reload")
+            },{})
+
     }
 }

@@ -66,6 +66,7 @@ class EmailChangeViewModel @ViewModelInject constructor(
             }
             .retry()
             .subscribe({
+                _newEmail.onNext("")
                 isProgressBarVisible.onNext(false)
                 goToUserScreen.onNext("Логин успешно изменен")
             },{})

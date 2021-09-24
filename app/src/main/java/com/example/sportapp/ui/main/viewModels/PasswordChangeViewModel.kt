@@ -27,10 +27,7 @@ class PasswordChangeViewModel @ViewModelInject constructor(
     val tvEndEnabled = BehaviorSubject.createDefault(false)
 
     val passwordChahge = PublishSubject.create<Unit>()
-
-    val snackBarMessage = BehaviorSubject.create<String>()
-
-    val lottieResult = BehaviorSubject.create<Boolean>()
+    val errorMessage = BehaviorSubject.create<String>()
 
     init {
         val newPasswordSubject = _newPassword
@@ -56,25 +53,23 @@ class PasswordChangeViewModel @ViewModelInject constructor(
 
         passwordChahge
             .withLatestFrom(newPasswordSubject) {_,password -> password.first}
+            .doOnNext {
+                isProgressBarVisible.onNext(true)
+            }
             .observeOn(Schedulers.io())
             .switchMap {
                 mainApiRepository.updatePassword(it)
             }
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
-                lottieResult.onNext(true)
-            }
             .doOnError {
+                isProgressBarVisible.onNext(false)
+                errorMessage.onNext(it.localizedMessage)
             }
-            .subscribe()
-
-        lottieResult
-            .delay(3000,TimeUnit.MILLISECONDS)
-            .doOnNext {
-                if (it) {
-                    goToUserScreen.onNext("")
-                }
-            }
-            .subscribe()
+            .retry()
+            .subscribe({
+                _newPassword.onNext("")
+                isProgressBarVisible.onNext(false)
+                goToUserScreen.onNext("Пароль успешно изменен")
+            },{})
     }
 }

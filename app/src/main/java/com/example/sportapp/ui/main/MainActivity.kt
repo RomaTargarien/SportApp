@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
         },{})
 
         emailVerifyingViewModel.verifyingWasSent.subscribe({
-            router.logOut()
+            //router.logOut()
         },{})
         passwordChangeDialogViewModel.passwordHasChanged.subscribe({
             router.logOut()

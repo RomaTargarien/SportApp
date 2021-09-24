@@ -228,8 +228,24 @@ class DefaultMainRepository @Inject constructor(
                     if (task.isSuccessful) {
                         emiter.onNext(Unit)
                     } else {
-                        emiter.onError(task.exception)
+                        emiter.onError(Exception(""))
                     }
+                }
+        }
+    }
+
+    override fun reloadUser(): Observable<Unit> {
+        return Observable.create { emiter ->
+            auth.currentUser!!.reload().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    emiter.onNext(Unit)
+                }
+                if (task.isCanceled) {
+                    emiter.onError(Exception(""))
+                }
+            }
+                .addOnFailureListener {
+                    emiter.onError(it)
                 }
         }
     }
