@@ -83,7 +83,7 @@ fun Fragment.snackbar(string: String,isBottomNavMenuVisible: Boolean = false) {
     val params = view.layoutParams as CoordinatorLayout.LayoutParams
     if (isBottomNavMenuVisible) {
         params.gravity = Gravity.TOP
-        params.topMargin = 690.toDp(requireContext())
+        params.topMargin = 660.toDp(requireContext())
     } else {
         params.gravity = Gravity.BOTTOM
     }

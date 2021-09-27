@@ -36,13 +36,13 @@ class DefaultMainRepository @Inject constructor(
         return Single.create { emiter ->
             val call = materialsApi.getMaterials(rssQuery)
             if (call.isCanceled) {
-                emiter.onError(Exception(""))
+                emiter.onError(Exception("1"))
             } else {
                 val response = call.execute()
                 if (response.isSuccessful) {
                     emiter.onSuccess(response.body())
                 } else {
-                    emiter.onError(Exception(""))
+                    emiter.onError(Exception(response.errorBody().toString()))
                 }
             }
         }

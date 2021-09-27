@@ -1,6 +1,8 @@
 package com.example.sportapp.ui.main
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -17,6 +19,7 @@ import androidx.transition.TransitionManager
 import com.example.sportapp.R
 import com.example.sportapp.databinding.ActivityMainBinding
 import com.example.sportapp.other.toDp
+import com.example.sportapp.service.MaterialsService
 import com.example.sportapp.ui.auth.AuthActivity
 import com.example.sportapp.ui.main.dialogs.dialogViewModels.EmailVerifyingViewModel
 import com.example.sportapp.ui.main.dialogs.dialogViewModels.PasswordChangeDialogViewModel
@@ -40,6 +43,8 @@ class MainActivity : AppCompatActivity() {
     private val passwordChangeViewModel: PasswordChangeViewModel by viewModels()
     private val passwordChangeDialogViewModel: PasswordChangeDialogViewModel by viewModels()
     private val emailVerifyingViewModel: EmailVerifyingViewModel by viewModels()
+    private lateinit var service: MaterialsService
+    private lateinit var intentService: Intent
 
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -50,6 +55,12 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         navigationBarColor()
         noInternetChecking()
+        service = MaterialsService()
+        intentService = Intent(this,service::class.java)
+
+        if (isServiceRunning(service::class.java)) {
+            stopService(intentService)
+        }
 
         router = MainRouter(this,binding,homeViewModel)
 
@@ -123,6 +134,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        if (!isServiceRunning(service::class.java)) {
+            startService(intentService)
+        }
+    }
+
     private fun noInternetChecking() {
         NoInternetDialogSignal.Builder(
             this,
@@ -157,5 +175,24 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         super.onBackPressed()
         Log.d("TAG",findNavController(R.id.navHostFragmentMain).backStack.toString())
+    }
+
+    private fun isServiceRunning(serviceClass: Class<*>): Boolean {
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+
+        // Loop through the running services
+        for (service in activityManager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                // If the service is running then return true
+                return true
+            }
+        }
+        return false
+    }
+
+    companion object {
+        fun newIntent(context: Context): Intent {
+            return Intent(context,MainActivity::class.java)
+        }
     }
 }

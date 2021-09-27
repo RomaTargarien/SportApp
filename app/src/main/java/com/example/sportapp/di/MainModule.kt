@@ -26,11 +26,11 @@ import retrofit2.Retrofit
 import javax.inject.Singleton
 
 @Module
-@InstallIn(ActivityComponent::class)
+@InstallIn(ApplicationComponent::class)
 object MainModule {
 
     @Provides
-    @ActivityScoped
+    @Singleton
     fun provideMaterialsApi(): MaterialsApi = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(TikXmlConverterFactory.create())
@@ -38,7 +38,7 @@ object MainModule {
         .create(MaterialsApi::class.java)
 
     @Provides
-    @ActivityScoped
+    @Singleton
     fun provideMainApiRepository(
         materialsApi: MaterialsApi,
         dao: NewsDao,
@@ -49,25 +49,25 @@ object MainModule {
 
 
     @Provides
-    @ActivityScoped
+    @Singleton
     fun provideNewsDatabase(@ApplicationContext app: Context) = Room.databaseBuilder(
         app,NewsDatabase::class.java,"news_db"
     ).fallbackToDestructiveMigration().build()
 
 
     @Provides
-    @ActivityScoped
+    @Singleton
     fun provideNewsDao(db: NewsDatabase) = db.getNewsDao()
 
     @Provides
-    @ActivityScoped
+    @Singleton
     fun provideFirestoreCollection() = FirebaseFirestore.getInstance().collection("users")
 
     @Provides
-    @ActivityScoped
+    @Singleton
     fun provideAuthInstance() = FirebaseAuth.getInstance()
 
     @Provides
-    @ActivityScoped
+    @Singleton
     fun provideStorage() = Firebase.storage
 }
