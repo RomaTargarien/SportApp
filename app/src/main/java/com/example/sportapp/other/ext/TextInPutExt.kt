@@ -2,12 +2,14 @@ package com.example.sportapp.other
 
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import com.example.sportapp.other.states.Resource
 import com.google.android.material.textfield.TextInputLayout
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
 
 fun TextInputLayout.observe(): Observable<String> {
     return Observable.create { emitter: ObservableEmitter<String> ->
@@ -17,7 +19,9 @@ fun TextInputLayout.observe(): Observable<String> {
                 i: Int,
                 i1: Int,
                 i2: Int
-            ) {}
+            ) {
+                this@observe.isErrorEnabled = false
+            }
 
             override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
                 this@observe.setErrorEnabled(false)
@@ -36,6 +40,7 @@ fun TextInputLayout.observe(): Observable<String> {
 fun TextInputLayout.enableError(result: Resource<String>) {
     when (result) {
         is Resource.Error -> {
+            Log.d("TAG","error")
             this.setErrorEnabled(true)
             this.error = result.message
         }
@@ -50,19 +55,39 @@ fun TextInputLayout.textInputBehavior(
     subjectOutput: BehaviorSubject<Resource<String>>
 ): CompositeDisposable {
     val dispose = CompositeDisposable()
-    dispose.add(this.observe().distinctUntilChanged()
-        .subscribe({
-                   subjectInput.onNext(it)
-        },{}))
+    dispose.add(
+        this
+            .observe()
+            .distinctUntilChanged()
+            .subscribe({
+                subjectInput.onNext(it)
+            }, {})
+    )
 
     dispose.add(subjectOutput.subscribe({
         this.enableError(it)
-    },{}))
+    }, {}))
 
-    dispose.add(subjectInput.subscribe( {
-        this.editText?.setText(it)
-        this.editText?.setSelection(it.length)
-    },{},{}))
+    return dispose
+}
+
+fun TextInputLayout.textInputBehavior2(
+    subjectInput: BehaviorSubject<String>,
+    subjectOutput: PublishSubject<Resource<String>>
+): CompositeDisposable {
+    val dispose = CompositeDisposable()
+    dispose.add(
+        this
+            .observe()
+            .distinctUntilChanged()
+            .subscribe({
+                subjectInput.onNext(it)
+            }, {})
+    )
+
+    dispose.add(subjectOutput.subscribe({
+        this.enableError(it)
+    }, {}))
 
     return dispose
 }

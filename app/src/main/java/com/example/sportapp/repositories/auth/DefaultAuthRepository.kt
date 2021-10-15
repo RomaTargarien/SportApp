@@ -1,5 +1,6 @@
 package com.example.sportapp.repositories.auth
 
+import android.util.Log
 import com.example.sportapp.models.User
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.AuthCredential
@@ -36,6 +37,7 @@ class DefaultAuthRepository : AuthRepository {
             auth.signInWithCredential(credential)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        Log.d("TAG","login google")
                         emiter.onSuccess(task.result)
                     } else {
                         emiter.onError(task.exception)

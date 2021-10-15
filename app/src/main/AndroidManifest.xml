@@ -13,27 +13,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SportApp">
-
         <activity
-            android:name=".ui.main.MainActivity"
+            android:name=".screen.main.MainActivity"
             android:exported="true" />
-        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>
-        <activity android:name=".ui.auth.AuthActivity"
+        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity" />
+        <activity android:name=".screen.RootActivity"
             android:exported="true">
-        </activity>
-
-        <activity android:name=".ui.introduction.IntroActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <service
-            android:enabled="true"
-            android:name=".service.MaterialsService">
-
-        </service>
+            android:name=".service.MaterialsService"
+            android:enabled="true"/>
 
         <meta-data
             android:name="preloaded_fonts"

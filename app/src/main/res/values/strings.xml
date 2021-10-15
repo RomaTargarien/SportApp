@@ -25,6 +25,7 @@
     <string name="error_while_refreshing">Не удалось обновить, попробуйте позже</string>
     <string name="refreshing_complete">Лента обновлена</string>
     <string name="no_fresh_news">Нет недавних новостей</string>
+    <string name="log_in_failed">Log in failed</string>
 </resources>
 
 

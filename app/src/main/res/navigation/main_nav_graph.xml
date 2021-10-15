@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.sportapp.ui.main.fragments.HomeFragment"
+        android:name="com.example.sportapp.screen.main.home.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" >
         <action
@@ -19,7 +19,7 @@
     </fragment>
     <fragment
         android:id="@+id/categoriesFragment"
-        android:name="com.example.sportapp.ui.main.fragments.CategoriesFragment"
+        android:name="com.example.sportapp.screen.main.categories.CategoriesFragment"
         android:label="fragment_search"
         tools:layout="@layout/fragment_categories" >
         <action
@@ -29,7 +29,7 @@
 
     <fragment
         android:id="@+id/userFragment"
-        android:name="com.example.sportapp.ui.main.fragments.UserFragmemt"
+        android:name="com.example.sportapp.screen.main.profile.UserFragment"
         android:label="fragment_user"
         tools:layout="@layout/fragment_user">
         <action
@@ -50,7 +50,7 @@
 
     <fragment
         android:id="@+id/itemFragment"
-        android:name="com.example.sportapp.ui.main.fragments.ItemFragment"
+        android:name="com.example.sportapp.screen.main.item.ItemFragment"
         android:label="fragment_item"
         tools:layout="@layout/fragment_item" >
         <action
@@ -63,7 +63,7 @@
 
     <fragment
         android:id="@+id/selectedCategoryFragment"
-        android:name="com.example.sportapp.ui.main.fragments.SelectedCategoryFragment"
+        android:name="com.example.sportapp.screen.main.selected_category.SelectedCategoryFragment"
         android:label="fragment_selected_category"
         tools:layout="@layout/fragment_selected_category">
         <argument
@@ -79,7 +79,7 @@
     </fragment>
     <fragment
         android:id="@+id/emailChangeFragment"
-        android:name="com.example.sportapp.ui.main.fragments.EmailChangeFragment"
+        android:name="com.example.sportapp.screen.main.profile.change_email.EmailChangeFragment"
         android:label="fragment_email_change"
         tools:layout="@layout/fragment_email_change" >
         <action
@@ -90,7 +90,7 @@
     </fragment>
     <fragment
         android:id="@+id/passwordChangeFragmnet"
-        android:name="com.example.sportapp.ui.main.fragments.PasswordChangeFragmnet"
+        android:name="com.example.sportapp.screen.main.profile.change_password.PasswordChangeFragmnet"
         android:label="fragment_password_change"
         tools:layout="@layout/fragment_password_change" >
         <action

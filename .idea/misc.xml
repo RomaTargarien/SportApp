@@ -32,6 +32,27 @@
         <entry key="..\:/android-studio-2020.3.1.15-windows/AndroidApps/Apps/SportApp/app/src/main/res/layout/progress_screen.xml" value="0.12360688956433637" />
         <entry key="..\:/android-studio-2020.3.1.15-windows/AndroidApps/Apps/SportApp/app/src/main/res/menu/bottom_nav_menu.xml" value="0.25025641025641027" />
         <entry key="..\:/android-studio-2020.3.1.15-windows/AndroidApps/Apps/SportApp/app/src/main/res/menu/main_menu.xml" value="0.25025641025641027" />
+        <entry key="app/src/main/res/layout/activity_auth.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/activity_intro.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/activity_root.xml" value="0.21603260869565216" />
+        <entry key="app/src/main/res/layout/fragment_categories.xml" value="0.2441123188405797" />
+        <entry key="app/src/main/res/layout/fragment_email_change.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/fragment_forgot_password.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/fragment_item.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/fragment_login.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/fragment_password_change.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/fragment_register.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/fragment_root_auth.xml" value="0.21603260869565216" />
+        <entry key="app/src/main/res/layout/fragment_selected_category.xml" value="0.2441123188405797" />
+        <entry key="app/src/main/res/layout/fragment_user.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/item_category.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/item_category_home.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/item_intro.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/item_material.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/item_material_header.xml" value="0.15577507598784193" />
+        <entry key="app/src/main/res/layout/progress_screen.xml" value="0.15577507598784193" />
       </map>
     </option>
   </component>

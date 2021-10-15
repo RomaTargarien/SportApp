@@ -1,90 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.main.fragments.HomeFragment">
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
 
-    <RelativeLayout
+    </data>
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:background="#151515"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:context=".screen.main.home.HomeFragment">
 
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/itemsToRefresh"
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            android:background="#151515"
+            android:layout_height="match_parent">
 
-            <androidx.core.widget.NestedScrollView
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/itemsToRefresh"
                 android:layout_width="match_parent"
-                android:id="@+id/scroller"
-                android:layout_height="match_parent"
-                android:fillViewport="true"
-                android:scrollbars="none">
+                android:layout_height="wrap_content"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/container"
+                <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:id="@+id/scroller"
+                    android:layout_height="match_parent"
+                    android:fillViewport="true"
+                    android:scrollbars="none">
 
-                    <TextView
-                        android:id="@+id/ibLike"
-                        style="@style/SubTittleTextViewStyle"
-                        android:text="@string/MyCategories"
-                        android:textColor="#E3E2E2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginTop="6dp"
-                        android:background="@android:color/transparent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.0">
 
-                    </TextView>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvCategories"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        android:layout_marginTop="10dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/ibLike">
+                        android:layout_height="match_parent">
 
-                    </androidx.recyclerview.widget.RecyclerView>
+                        <TextView
+                            android:id="@+id/ibLike"
+                            style="@style/SubTittleTextViewStyle"
+                            android:text="@string/MyCategories"
+                            android:textColor="#E3E2E2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginTop="6dp"
+                            android:background="@android:color/transparent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintVertical_bias="0.0">
 
+                        </TextView>
 
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvCategories"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            android:layout_marginTop="10dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/ibLike">
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvNews"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.0"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/rvCategories"
-                        app:layout_constraintVertical_bias="0.0" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </androidx.core.widget.NestedScrollView>
-
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-
-    </RelativeLayout>
-
+                        </androidx.recyclerview.widget.RecyclerView>
 
 
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvNews"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0.0"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/rvCategories"
+                            app:layout_constraintVertical_bias="0.0" />
 
-</FrameLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.core.widget.NestedScrollView>
+
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
+        </RelativeLayout>
+
+
+    </FrameLayout>
+</layout>

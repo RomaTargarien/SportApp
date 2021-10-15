@@ -115,10 +115,11 @@ class DefaultMainRepository @Inject constructor(
             auth.currentUser?.sendEmailVerification()?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     emiter.onNext(Unit)
-                } else {
-                    emiter.onError(Exception(""))
                 }
             }
+                ?.addOnFailureListener {
+                    emiter.onError(it)
+                }
         }
     }
 
@@ -127,10 +128,11 @@ class DefaultMainRepository @Inject constructor(
             auth.currentUser?.updateEmail(email)?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     emiter.onNext(Unit)
-                } else {
-                    emiter.onError(Exception(""))
                 }
             }
+                ?.addOnFailureListener {
+                    emiter.onError(it)
+                }
         }
     }
 
@@ -142,9 +144,9 @@ class DefaultMainRepository @Inject constructor(
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             emiter.onNext(Unit)
-                        } else {
-                            emiter.onError(Exception(""))
                         }
+                    }.addOnFailureListener {
+                        emiter.onError(it)
                     }
             }
         }
@@ -227,9 +229,10 @@ class DefaultMainRepository @Inject constructor(
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         emiter.onNext(Unit)
-                    } else {
-                        emiter.onError(Exception(""))
                     }
+                }
+                .addOnFailureListener {
+                    emiter.onError(it)
                 }
         }
     }
